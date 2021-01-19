@@ -1,12 +1,13 @@
 import React, {Component} from "react";
 import {withRouter} from "react-router-dom";
 
-class Login extends Component{
+class Register extends Component{
     constructor(props) {
         super(props);
         this.state = {
-            formValue: {username: "", password: "", confirm: "", role: "customer"},
+            formValue: {username: "", email: "", password: "", confirm: "", role: "customer"},
             errors: {username: {classname: "", text: "", promptClassname: ""},
+                    email: {classname: "", text: "", promptClassname: ""},
                     password: {classname: "", text: "", promptClassname: ""},
                     confirm: {classname: "", text: "", promptClassname: ""}},
             buttonEnabled: false,
@@ -14,23 +15,24 @@ class Login extends Component{
         }
     }
 
+    // update values of input except radio value
     change = (event) => {
         event.preventDefault();
         this.setState({
             formValue: {
                 ...this.state.formValue,
                 [event.target.id]: event.target.value}
-        }, () => {this.check(event);
-                          console.log(this.state)});
+        }, () => {this.check(event)});
     }
 
+    // update the value of radio
     radio = (event) =>{
         this.setState({
             formValue:{
                 ...this.state.formValue,
                 role: event.target.id
             }
-        }, () => console.log(this.state))
+        }, )
     }
 
     check = (e) => {
@@ -38,8 +40,12 @@ class Login extends Component{
         e.preventDefault();
 
         const username = {};
+        const email = {};
         const password = {};
         const confirm = {};
+
+        let change = {};
+        let confirmInPassword = false;
 
         // check username, need to check username.trim() first
         // // when check if username is empty, use trim().
@@ -61,12 +67,25 @@ class Login extends Component{
                 username.promptClassname = "valid-feedback";
                 username.text = "perfect! a sweet name";
             }
-            this.setState({
-                errors:{
-                    ...this.state.errors,
-                    username: username,
-                }
-            })
+            change = username;
+        }
+
+        // check email
+        if(e.target.id === "email") {
+            if (this.state.formValue.email.trim() === "") {
+                email.classname = "is-valid"
+                email.promptClassname = "valid-feedback";
+                email.text = "no email address? that's ok";
+            } else if (this.state.formValue.email.indexOf('@') < 0) {
+                email.classname = "is-invalid"
+                email.promptClassname = "invalid-feedback";
+                email.text = "seems like an invalid email address";
+            } else {
+                email.classname = "is-valid"
+                email.promptClassname = "valid-feedback";
+                email.text = "perfect! go on";
+            }
+            change = email;
         }
 
         // check password
@@ -88,38 +107,20 @@ class Login extends Component{
                 password.promptClassname = "valid-feedback";
                 password.text = "it works";
             }
-            this.setState({
-                errors:{
-                    ...this.state.errors,
-                    password: password,
-                }
-            })
-            // check confirm again in password
+            change = password;
             if(this.state.errors.confirm.classname !== ""
             && this.state.formValue.confirm !== this.state.formValue.password){
+                confirmInPassword = true;
                 confirm.classname = "is-invalid";
                 confirm.promptClassname = "invalid-feedback";
                 confirm.text = "password doesn't match";
-                this.setState({
-                    errors:{
-                        ...this.state.errors,
-                        confirm: confirm,
-                        password: password,
-                    }
-                })
             }
             else if(this.state.errors.confirm.classname !== ""
             && this.state.formValue.confirm === this.state.formValue.password){
+                confirmInPassword = true;
                 confirm.classname = "is-valid";
                 confirm.promptClassname = "valid-feedback";
                 confirm.text = "the same";
-                this.setState({
-                    errors:{
-                        ...this.state.errors,
-                        confirm: confirm,
-                        password: password,
-                    }
-                })
             }
         }
 
@@ -142,25 +143,43 @@ class Login extends Component{
                 confirm.promptClassname = "valid-feedback";
                 confirm.text = "the same";
             }
+            change = confirm;
+        }
+
+        // update the state and button
+        if(!confirmInPassword){
             this.setState({
                 errors:{
                     ...this.state.errors,
+                    [e.target.id]: change,
+                }
+            }, () => this.buttonChange())
+        } else {
+            this.setState({
+                errors:{
+                    ...this.state.errors,
+                    password: change,
                     confirm: confirm,
                 }
-            });
+            }, () => this.buttonChange())
         }
 
-        // check button
-        const buttonEnabled = (username.classname === "is-valid"
-                || this.state.errors.username.classname === "is-valid")
-            && (password.classname === "is-valid"
-                || this.state.errors.password.classname === "is-valid")
-            && (confirm.classname === "is-valid"
-                || this.state.errors.confirm.classname === "is-valid");
+    }
+
+    // when input values change, button will be changed correspondingly
+    buttonChange = () => {
+        let buttonEnabled = (this.state.errors.username.classname === "is-valid")
+        && (this.state.errors.password.classname === "is-valid")
+        && (this.state.errors.confirm.classname === "is-valid")
+        && (this.state.errors.email.classname === "is-valid");
+
         this.setState({
             buttonEnabled: buttonEnabled,
-        });
+        })
+    }
 
+    submit = () => {
+        
     }
 
     test = () => {
@@ -182,6 +201,19 @@ class Login extends Component{
                     />
                     <div className={this.state.errors.username.promptClassname}>
                         {this.state.errors.username.text}
+                    </div>
+                </div>
+                <div className={"form-group"}>
+                    <label htmlFor={"email"}>email:</label>
+                    <input
+                        className={`form-control ${this.state.errors.email.classname}`}
+                        type={"email"}
+                        id={"email"}
+                        name={"email"} // to pair label
+                        onChange={this.change}
+                    />
+                    <div className={this.state.errors.email.promptClassname}>
+                        {this.state.errors.email.text}
                     </div>
                 </div>
                 <div className={"form-group"}>
@@ -239,4 +271,4 @@ class Login extends Component{
 
 }
 
-export default withRouter(Login);
+export default withRouter(Register);
