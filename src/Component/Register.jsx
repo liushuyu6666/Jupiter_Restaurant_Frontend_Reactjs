@@ -11,28 +11,36 @@ class Register extends Component{
                     password: {classname: "", text: "", promptClassname: ""},
                     confirm: {classname: "", text: "", promptClassname: ""}},
             buttonEnabled: false,
+            errorsFromServer: {value: "", color: ""},
 
         }
     }
 
-    // update values of input except radio value
+    // change values of input except radio value
     change = (event) => {
         event.preventDefault();
+
+        // clear errorsFromServer and fill in input values
         this.setState({
             formValue: {
                 ...this.state.formValue,
-                [event.target.id]: event.target.value}
+                [event.target.id]: event.target.value},
+            errorsFromServer: {value: "", color: ""},
         }, () => {this.check(event)});
     }
 
-    // update the value of radio
+    // change the value of radio
     radio = (event) =>{
+        event.preventDefault();
+
+        // clear errorsFromServer and fill in the radio values
         this.setState({
             formValue:{
                 ...this.state.formValue,
                 role: event.target.id
-            }
-        }, )
+            },
+            errorsFromServer: {value: "", color: ""},
+        }, () => console.log(this.state))
     }
 
     check = (e) => {
@@ -178,8 +186,31 @@ class Register extends Component{
         })
     }
 
-    submit = () => {
-        
+    submit = (event) => {
+        event.preventDefault();
+
+        fetch("/v1/register",{
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                "username": this.state.formValue.username,
+                "password": this.state.formValue.password,
+                "email": this.state.formValue.email,
+            })
+        }).then(res => res.json())
+            .then(res => {
+                this.setState({
+                    errorsFromServer: {
+                        value: res.msg,
+                        color: (res.err === null)?"green":"red",
+                    },
+                }, () => {
+                    console.log(this.state.errorsFromServer)
+                });
+            })
+
     }
 
     test = () => {
@@ -248,21 +279,33 @@ class Register extends Component{
                     <div className="custom-control custom-radio custom-control-inline">
                         <input type="radio" id="customer" name="role"
                                    className="custom-control-input" defaultChecked/>
-                        <label className="custom-control-label" htmlFor="customer">a customer</label>
+                        <label className="custom-control-label" htmlFor="customer">
+                            a customer
+                        </label>
                     </div>
                     <div className="custom-control custom-radio custom-control-inline">
                         <input type="radio" id="owner" name="role"
                                className="custom-control-input"/>
-                        <label className="custom-control-label" htmlFor="owner">a shop owner</label>
+                        <label className="custom-control-label" htmlFor="owner">
+                            a shop owner
+                        </label>
                     </div>
                     <div className="custom-control custom-radio custom-control-inline">
                         <input type="radio" id="admin" name="role"
                                className="custom-control-input"/>
-                        <label className="custom-control-label" htmlFor="admin">an admin</label>
+                        <label className="custom-control-label" htmlFor="admin">
+                            an admin
+                        </label>
                     </div>
                 </div>
+                <p className={"text-center"} style={{color:this.state.errorsFromServer.color}}>
+                    {this.state.errorsFromServer.value}
+                </p>
                 <div className={"form-group"}>
-                    <button type="button" className="btn btn-primary"  disabled={!this.state.buttonEnabled}>register</button>
+                    <button type="button"
+                            className="btn btn-primary"
+                            disabled={!this.state.buttonEnabled}
+                            onClick={this.submit}>register</button>
                 </div>
             </form>
         );
