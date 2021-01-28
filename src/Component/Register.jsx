@@ -30,18 +30,18 @@ class Register extends Component{
     }
 
     // change the value of radio
-    radio = (event) =>{
-        event.preventDefault();
-
-        // clear errorsFromServer and fill in the radio values
-        this.setState({
-            formValue:{
-                ...this.state.formValue,
-                role: event.target.id
-            },
-            errorsFromServer: {value: "", color: ""},
-        }, () => console.log(this.state))
-    }
+    // radio = (event) =>{
+    //     event.preventDefault();
+    //
+    //     // clear errorsFromServer and fill in the radio values
+    //     this.setState({
+    //         formValue:{
+    //             ...this.state.formValue,
+    //             role: event.target.id
+    //         },
+    //         errorsFromServer: {value: "", color: ""},
+    //     }, () => console.log(this.state))
+    // }
 
     check = (e) => {
 
@@ -219,95 +219,123 @@ class Register extends Component{
 
     render(){
         return(
-            <form>
-                <h4>please login</h4>
-                <div className={"form-group"}>
-                    <label htmlFor={"username"}>username:</label>
-                    <input
-                        className={`form-control ${this.state.errors.username.classname}`}
-                        type={"text"}
-                        id={"username"}
-                        name={"username"} // to pair label
-                        onChange={this.change}
-                    />
-                    <div className={this.state.errors.username.promptClassname}>
-                        {this.state.errors.username.text}
+            <div className={"d-flex " +
+            "justify-content-around"}
+                 style={{backgroundColor: '#C8C8A9'}}>
+                <div className={"p-2 d-flex flex-column justify-content-center"}
+                     style={{backgroundColor: '#C8C8A9',
+                     width: '320px'}}>
+                    <div className={"p-2"}>
+                        <h4 style={{color: '#FFFFFF'}}>register</h4>
+                    </div>
+                    <div className={"p-2 d-flex justify-content-around flex-grow-1"}
+                         style={{backgroundColor: '#C8C8A9'}}>
+                        <label style={{marginBottom: '0px',
+                                       color: '#FFFFFF'}}>customer</label>
+                        <label style={{marginBottom: '0px',
+                                       color: '#FFFFFF'}}>shop owner</label>
+                        <label style={{marginBottom: '0px',
+                                        color: '#FFFFFF'}}>admin</label>
+                    </div>
+                    <div className={"p-2"}>
+                        <form>
+                            <div className={"form-group"}>
+                                <label htmlFor={"username"}
+                                style={{color: '#FFFFFF'}}>username:</label>
+                                <input
+                                    className={`form-control ${this.state.errors.username.classname}`}
+                                    type={"text"}
+                                    id={"username"}
+                                    name={"username"} // to pair label
+                                    onChange={this.change}
+                                />
+                                <div className={this.state.errors.username.promptClassname}>
+                                    {this.state.errors.username.text}
+                                </div>
+                            </div>
+                            <div className={"form-group"}>
+                                <label htmlFor={"email"}
+                                       style={{color: '#FFFFFF'}}>email:</label>
+                                <input
+                                    className={`form-control ${this.state.errors.email.classname}`}
+                                    type={"email"}
+                                    id={"email"}
+                                    name={"email"} // to pair label
+                                    onChange={this.change}
+                                />
+                                <div className={this.state.errors.email.promptClassname}>
+                                    {this.state.errors.email.text}
+                                </div>
+                            </div>
+                            <div className={"form-group"}>
+                                <label htmlFor={"password"}
+                                       style={{color: '#FFFFFF'}}>password:</label>
+                                <input
+                                    className={`form-control ${this.state.errors.password.classname}`}
+                                    type={"password"}
+                                    id={"password"}
+                                    name={"password"} // to pair label
+                                    onChange={this.change}
+                                />
+                                <div className={this.state.errors.password.promptClassname}>
+                                    {this.state.errors.password.text}
+                                </div>
+                            </div>
+                            <div className={"form-group"}>
+                                <label htmlFor={"confirm"}
+                                       style={{color: '#FFFFFF'}}>confirm password:</label>
+                                <input
+                                    className={`form-control ${this.state.errors.confirm.classname}`}
+                                    type={"password"}
+                                    id={"confirm"}
+                                    name={"confirm"} // to pair label
+                                    onChange={this.change}
+                                />
+                                <div className={this.state.errors.confirm.promptClassname}>
+                                    {this.state.errors.confirm.text}
+                                </div>
+                            </div>
+                            {/*<div className={"form-group"} onChange={this.radio}>*/}
+                            {/*    <label>register as:</label>*/}
+                            {/*    <br/>*/}
+                            {/*    <div className="custom-control custom-radio custom-control-inline">*/}
+                            {/*        <input type="radio" id="customer" name="role"*/}
+                            {/*               className="custom-control-input" defaultChecked/>*/}
+                            {/*        <label className="custom-control-label" htmlFor="customer">*/}
+                            {/*            a customer*/}
+                            {/*        </label>*/}
+                            {/*    </div>*/}
+                            {/*    <div className="custom-control custom-radio custom-control-inline">*/}
+                            {/*        <input type="radio" id="owner" name="role"*/}
+                            {/*               className="custom-control-input"/>*/}
+                            {/*        <label className="custom-control-label" htmlFor="owner">*/}
+                            {/*            a shop owner*/}
+                            {/*        </label>*/}
+                            {/*    </div>*/}
+                            {/*    <div className="custom-control custom-radio custom-control-inline">*/}
+                            {/*        <input type="radio" id="admin" name="role"*/}
+                            {/*               className="custom-control-input"/>*/}
+                            {/*        <label className="custom-control-label" htmlFor="admin">*/}
+                            {/*            an admin*/}
+                            {/*        </label>*/}
+                            {/*    </div>*/}
+                            {/*</div>*/}
+                            <p className={"text-center"} style={{color:this.state.errorsFromServer.color}}>
+                                {this.state.errorsFromServer.value}
+                            </p>
+                            <div className={"form-group"}>
+                                <button type="button"
+                                        className="btn btn-primary"
+                                        disabled={!this.state.buttonEnabled}
+                                        style={{color:'#FFFFFF',
+                                                backgroundColor: '#C8C8A9',
+                                                borderColor: '#FFFFFF'}}
+                                        onClick={this.submit}>register</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <div className={"form-group"}>
-                    <label htmlFor={"email"}>email:</label>
-                    <input
-                        className={`form-control ${this.state.errors.email.classname}`}
-                        type={"email"}
-                        id={"email"}
-                        name={"email"} // to pair label
-                        onChange={this.change}
-                    />
-                    <div className={this.state.errors.email.promptClassname}>
-                        {this.state.errors.email.text}
-                    </div>
-                </div>
-                <div className={"form-group"}>
-                    <label htmlFor={"password"}>password:</label>
-                    <input
-                        className={`form-control ${this.state.errors.password.classname}`}
-                        type={"password"}
-                        id={"password"}
-                        name={"password"} // to pair label
-                        onChange={this.change}
-                    />
-                    <div className={this.state.errors.password.promptClassname}>
-                        {this.state.errors.password.text}
-                    </div>
-                </div>
-                <div className={"form-group"}>
-                    <label htmlFor={"confirm"}>confirm password:</label>
-                    <input
-                        className={`form-control ${this.state.errors.confirm.classname}`}
-                        type={"password"}
-                        id={"confirm"}
-                        name={"confirm"} // to pair label
-                        onChange={this.change}
-                    />
-                    <div className={this.state.errors.confirm.promptClassname}>
-                        {this.state.errors.confirm.text}
-                    </div>
-                </div>
-                <div className={"form-group"} onChange={this.radio}>
-                    <label>register as:</label>
-                    <br/>
-                    <div className="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="customer" name="role"
-                                   className="custom-control-input" defaultChecked/>
-                        <label className="custom-control-label" htmlFor="customer">
-                            a customer
-                        </label>
-                    </div>
-                    <div className="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="owner" name="role"
-                               className="custom-control-input"/>
-                        <label className="custom-control-label" htmlFor="owner">
-                            a shop owner
-                        </label>
-                    </div>
-                    <div className="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="admin" name="role"
-                               className="custom-control-input"/>
-                        <label className="custom-control-label" htmlFor="admin">
-                            an admin
-                        </label>
-                    </div>
-                </div>
-                <p className={"text-center"} style={{color:this.state.errorsFromServer.color}}>
-                    {this.state.errorsFromServer.value}
-                </p>
-                <div className={"form-group"}>
-                    <button type="button"
-                            className="btn btn-primary"
-                            disabled={!this.state.buttonEnabled}
-                            onClick={this.submit}>register</button>
-                </div>
-            </form>
+            </div>
         );
     }
 

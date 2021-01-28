@@ -12,9 +12,9 @@ class Header extends Component{
         return(
             <Navbar bg="primary" variant="dark">
                 {/*<Navbar.Brand href="#home">Navbar</Navbar.Brand>*/}
-                <Drawer>
+                {/*<Drawer>*/}
 
-                </Drawer>
+                {/*</Drawer>*/}
 
                 <Nav className="mr-auto">
                     <Nav.Link href="#home">Home</Nav.Link>

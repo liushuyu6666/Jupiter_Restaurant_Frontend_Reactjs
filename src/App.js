@@ -8,6 +8,9 @@ import {
     Link,
 } from "react-router-dom";
 import Register from "./Component/Register";
+import Login from "./Component/Login";
+import FlexTest from "./Component/FlexTest";
+// import Drawer from "./Component/Drawer";
 
 function App() {
   return (
@@ -18,6 +21,12 @@ function App() {
               </Route>
               <Route path="/register" exact>
                   <Register />
+              </Route>
+              <Route path="/login" exact>
+                  <Login />
+              </Route>
+              <Route path="/test" exact>
+                  {/*<Drawer />*/}
               </Route>
           </Switch>
       </Router>
