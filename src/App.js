@@ -10,6 +10,7 @@ import {
 import Register from "./Component/Register";
 import Login from "./Component/Login";
 import FlexTest from "./Component/FlexTest";
+import AddNewShop from "./Component/AddNewShop";
 // import Drawer from "./Component/Drawer";
 
 function App() {
@@ -27,6 +28,9 @@ function App() {
               </Route>
               <Route path="/test" exact>
                   {/*<Drawer />*/}
+              </Route>
+              <Route path="/shops/add">
+                  <AddNewShop />
               </Route>
           </Switch>
       </Router>
