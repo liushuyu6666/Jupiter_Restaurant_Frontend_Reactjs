@@ -1,11 +1,4 @@
-import React, { useState } from 'react';
-import {
-    Carousel,
-    CarouselItem,
-    CarouselControl,
-    CarouselIndicators,
-    CarouselCaption
-} from 'reactstrap';
+import React  from 'react';
 
 
 const DishCard = (props) => {
@@ -24,6 +17,67 @@ const DishCard = (props) => {
         </div>
     )
 }
+
+export const FormGroup = (props) => {
+
+    return(
+        <div className={"form-group"}>
+            <label htmlFor={props.id}
+                   style={{color:"#00635a"}}>
+                {props.show}
+            </label>
+            <input
+                value={props.inputValue}
+                className={`form-control ${props.className}`}
+                type={props.type}
+                id={props.id}
+                name={props.id} // to pair label
+                onChange={props.change}
+            />
+            <div className={props.promptClassname}>
+                {props.promptText}
+            </div>
+        </div>
+    )
+}
+
+export const ArrayInputTags = (props) => {
+    return(
+        <div>
+            <label htmlFor={props.id} style={{color:"#00635a"}}>{props.show}</label>
+            <div className={"d-flex"}>
+                <input
+                    className={"form-control"}
+                    value={props.inputValue}
+                    type={"input"}
+                    id={props.id} // should be the same as the key in the formValue of state
+                    name={props.id} // to pair label
+                    onChange={props.changeFunc}
+                />
+                <button
+                    type={"button"}
+                    id={props.arrayKey}
+                    className={"btn btn-outline-primary btn-sm active"}
+                    disabled={!props.buttonEnable}
+                    name={props.id} // should be the same as the key in the formValue of state
+                    onClick={props.addFunc}>+</button>
+            </div>
+            <div className={"container"} id={"tagGroup"}>
+                <div className={"row"}>
+                    {(props.arrayValues || []).map(item => (
+                        <button
+                            key={props.id + "-" + item}
+                            className="btn btn-outline-success col-6-sm"
+                            name={props.arrayKey} // should be the same as the key in the state
+                            onClick={props.removeFunc}
+                            value={item}>{item}</button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    )
+}
+
 
 // const LoginAndRegister = (props) => {
 //
