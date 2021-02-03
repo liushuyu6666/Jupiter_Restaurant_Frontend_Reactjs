@@ -1,5 +1,6 @@
 import React, {Component} from "react";
 import {withRouter} from "react-router-dom";
+import {FormGroup, Dropdown} from "./Widgets";
 
 class Register extends Component{
     constructor(props) {
@@ -7,16 +8,18 @@ class Register extends Component{
         this.state = {
             formValue: {username: "", email: "", password: "", confirm: "", role: "customer"},
             errors: {username: {classname: "", text: "", promptClassname: ""},
-                    email: {classname: "", text: "", promptClassname: ""},
+                    email: {classname: "is-valid", text: "", promptClassname: ""},
                     password: {classname: "", text: "", promptClassname: ""},
                     confirm: {classname: "", text: "", promptClassname: ""}},
             buttonEnabled: false,
             errorsFromServer: {value: "", color: ""},
 
         }
+        this.roles = ["customer", "owner", "admin"];
+        this.allUsername = [];
     }
 
-    // change values of input except radio value
+    // change values of input except role value
     change = (event) => {
         event.preventDefault();
 
@@ -29,19 +32,17 @@ class Register extends Component{
         }, () => {this.check(event)});
     }
 
-    // change the value of radio
-    // radio = (event) =>{
-    //     event.preventDefault();
-    //
-    //     // clear errorsFromServer and fill in the radio values
-    //     this.setState({
-    //         formValue:{
-    //             ...this.state.formValue,
-    //             role: event.target.id
-    //         },
-    //         errorsFromServer: {value: "", color: ""},
-    //     }, () => console.log(this.state))
-    // }
+    // change values of role value, listen which role is selected
+    selectedItemFromDropdown = (event) =>{
+        event.preventDefault();
+        this.setState({
+            formValue: {
+                ...this.state.formValue,
+                role: event.target.id,
+            },
+            errorsFromServer: {value: "", color: ""},
+        }, () => {this.check(event)});
+    }
 
     check = (e) => {
 
@@ -73,7 +74,7 @@ class Register extends Component{
             } else {
                 username.classname = "is-valid"
                 username.promptClassname = "valid-feedback";
-                username.text = "perfect! a sweet name";
+                username.text = "";
             }
             change = username;
         }
@@ -179,7 +180,8 @@ class Register extends Component{
         let buttonEnabled = (this.state.errors.username.classname === "is-valid")
         && (this.state.errors.password.classname === "is-valid")
         && (this.state.errors.confirm.classname === "is-valid")
-        && (this.state.errors.email.classname === "is-valid");
+        && (this.state.errors.email.classname === "is-valid")
+        && (this.state.errorsFromServer.value.trim() === "");
 
         this.setState({
             buttonEnabled: buttonEnabled,
@@ -198,6 +200,7 @@ class Register extends Component{
                 "username": this.state.formValue.username,
                 "password": this.state.formValue.password,
                 "email": this.state.formValue.email,
+                "role": this.state.formValue.role,
             })
         }).then(res => res.json())
             .then(res => {
@@ -207,10 +210,10 @@ class Register extends Component{
                         color: (res.err === null)?"green":"red",
                     },
                 }, () => {
-                    console.log(this.state.errorsFromServer)
+                    this.buttonChange();
                 });
             })
-
+        // check button status again
     }
 
     test = () => {
@@ -219,126 +222,88 @@ class Register extends Component{
 
     render(){
         return(
-            <div className={"d-flex " +
-            "justify-content-around"}
-                 style={{backgroundColor: '#C8C8A9'}}>
-                <div className={"p-2 d-flex flex-column justify-content-center"}
-                     style={{backgroundColor: '#C8C8A9',
-                     width: '320px'}}>
-                    <div className={"p-2"}>
-                        <h4 style={{color: '#FFFFFF'}}>register</h4>
-                    </div>
-                    <div className={"p-2 d-flex justify-content-around flex-grow-1"}
-                         style={{backgroundColor: '#C8C8A9'}}>
-                        <label style={{marginBottom: '0px',
-                                       color: '#FFFFFF'}}>customer</label>
-                        <label style={{marginBottom: '0px',
-                                       color: '#FFFFFF'}}>shop owner</label>
-                        <label style={{marginBottom: '0px',
-                                        color: '#FFFFFF'}}>admin</label>
-                    </div>
-                    <div className={"p-2"}>
-                        <form>
-                            <div className={"form-group"}>
-                                <label htmlFor={"username"}
-                                style={{color: '#FFFFFF'}}>username:</label>
-                                <input
-                                    className={`form-control ${this.state.errors.username.classname}`}
-                                    type={"text"}
-                                    id={"username"}
-                                    name={"username"} // to pair label
-                                    onChange={this.change}
-                                />
-                                <div className={this.state.errors.username.promptClassname}>
-                                    {this.state.errors.username.text}
-                                </div>
-                            </div>
-                            <div className={"form-group"}>
-                                <label htmlFor={"email"}
-                                       style={{color: '#FFFFFF'}}>email:</label>
-                                <input
-                                    className={`form-control ${this.state.errors.email.classname}`}
-                                    type={"email"}
-                                    id={"email"}
-                                    name={"email"} // to pair label
-                                    onChange={this.change}
-                                />
-                                <div className={this.state.errors.email.promptClassname}>
-                                    {this.state.errors.email.text}
-                                </div>
-                            </div>
-                            <div className={"form-group"}>
-                                <label htmlFor={"password"}
-                                       style={{color: '#FFFFFF'}}>password:</label>
-                                <input
-                                    className={`form-control ${this.state.errors.password.classname}`}
-                                    type={"password"}
-                                    id={"password"}
-                                    name={"password"} // to pair label
-                                    onChange={this.change}
-                                />
-                                <div className={this.state.errors.password.promptClassname}>
-                                    {this.state.errors.password.text}
-                                </div>
-                            </div>
-                            <div className={"form-group"}>
-                                <label htmlFor={"confirm"}
-                                       style={{color: '#FFFFFF'}}>confirm password:</label>
-                                <input
-                                    className={`form-control ${this.state.errors.confirm.classname}`}
-                                    type={"password"}
-                                    id={"confirm"}
-                                    name={"confirm"} // to pair label
-                                    onChange={this.change}
-                                />
-                                <div className={this.state.errors.confirm.promptClassname}>
-                                    {this.state.errors.confirm.text}
-                                </div>
-                            </div>
-                            {/*<div className={"form-group"} onChange={this.radio}>*/}
-                            {/*    <label>register as:</label>*/}
-                            {/*    <br/>*/}
-                            {/*    <div className="custom-control custom-radio custom-control-inline">*/}
-                            {/*        <input type="radio" id="customer" name="role"*/}
-                            {/*               className="custom-control-input" defaultChecked/>*/}
-                            {/*        <label className="custom-control-label" htmlFor="customer">*/}
-                            {/*            a customer*/}
-                            {/*        </label>*/}
-                            {/*    </div>*/}
-                            {/*    <div className="custom-control custom-radio custom-control-inline">*/}
-                            {/*        <input type="radio" id="owner" name="role"*/}
-                            {/*               className="custom-control-input"/>*/}
-                            {/*        <label className="custom-control-label" htmlFor="owner">*/}
-                            {/*            a shop owner*/}
-                            {/*        </label>*/}
-                            {/*    </div>*/}
-                            {/*    <div className="custom-control custom-radio custom-control-inline">*/}
-                            {/*        <input type="radio" id="admin" name="role"*/}
-                            {/*               className="custom-control-input"/>*/}
-                            {/*        <label className="custom-control-label" htmlFor="admin">*/}
-                            {/*            an admin*/}
-                            {/*        </label>*/}
-                            {/*    </div>*/}
-                            {/*</div>*/}
-                            <p className={"text-center"} style={{color:this.state.errorsFromServer.color}}>
-                                {this.state.errorsFromServer.value}
-                            </p>
-                            <div className={"form-group"}>
-                                <button type="button"
-                                        className="btn btn-primary"
-                                        disabled={!this.state.buttonEnabled}
-                                        style={{color:'#FFFFFF',
-                                                backgroundColor: '#C8C8A9',
-                                                borderColor: '#FFFFFF'}}
-                                        onClick={this.submit}>register</button>
-                            </div>
-                        </form>
+            <form className={"d-flex justify-content-around"}>
+                <div>
+
+                </div>
+                <div className={"d-flex flex-column"}>
+                    <h4 className={"d-flex"}
+                        style={{color:"#00635a"}}><strong>register</strong>
+                    </h4>
+                    <FormGroup
+                        id={"username"}
+                        inputValue={this.state.formValue["username"]}
+                        show={"username"}
+                        type={"text"}
+                        className={this.state.errors.username.classname}
+                        promptClassname={this.state.errors.username.promptClassname}
+                        promptText={this.state.errors.username.text}
+                        change={this.change}
+                    />
+                    <FormGroup
+                        id={"email"}
+                        inputValue={this.state.formValue["email"]}
+                        show={"email"}
+                        type={"text"}
+                        className={this.state.errors.email.classname}
+                        promptClassname={this.state.errors.email.promptClassname}
+                        promptText={this.state.errors.email.text}
+                        change={this.change}
+                    />
+                    <FormGroup
+                        id={"password"}
+                        inputValue={this.state.formValue["password"]}
+                        show={"password"}
+                        type={"password"}
+                        className={this.state.errors.password.classname}
+                        promptClassname={this.state.errors.password.promptClassname}
+                        promptText={this.state.errors.password.text}
+                        change={this.change}
+                    />
+                    <FormGroup
+                        id={"confirm"}
+                        inputValue={this.state.formValue["confirm"]}
+                        show={"confirm password"}
+                        type={"password"}
+                        className={this.state.errors.confirm.classname}
+                        promptClassname={this.state.errors.confirm.promptClassname}
+                        promptText={this.state.errors.confirm.text}
+                        change={this.change}
+                    />
+                    <Dropdown
+                        id={"role"}
+                        show={"role"}
+                        dropdownItems={this.roles}
+                        selectedItemFromDropdown={this.selectedItemFromDropdown}/>
+                    <p className={"text-center"} style={{color:this.state.errorsFromServer.color}}>
+                        {this.state.errorsFromServer.value}
+                    </p>
+                    <div className={"form-group"}>
+                        <button type="button"
+                                className={"btn btn-primary btn-sm active"}
+                                disabled={!this.state.buttonEnabled}
+                                onClick={this.submit}>register</button>
                     </div>
                 </div>
-            </div>
+                <div >
+                </div>
+            </form>
         );
     }
 
+    componentDidMount() {
+        // fetch("/v1/register",{
+        //     "method": "POST",
+        //     "headers": {
+        //         "Content-Type": "application/json",
+        //     },
+        //     body: JSON.stringify({
+        //         "username": this.state.formValue.username,
+        //         "password": this.state.formValue.password,
+        //         "email": this.state.formValue.email,
+        //     })
+        // })
+    }
 
 }
 
