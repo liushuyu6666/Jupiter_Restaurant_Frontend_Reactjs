@@ -118,5 +118,22 @@ const Dropdown = (props) => {
     )
 }
 
+const NoPermissionPage = (props) => {
+    return(
+        <div className={"d-flex justify-content-around"}>
+            <div className={"d-flex flex-column align-items-center"}>
+                <img
+                    src="http://s3.ca-central-1.amazonaws.com/jupiterlsy/1612328951096-sad_face_for_block_page.png"
+                    style={{width: 200, height: 200}}
+                    alt="you can't access to this page"
+                />
+                <div className="alert alert-warning" role="alert">
+                    {props.message}
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export default DishCard;
-export {FormGroup, ArrayInputTags, Dropdown};
+export {FormGroup, ArrayInputTags, Dropdown, NoPermissionPage};
