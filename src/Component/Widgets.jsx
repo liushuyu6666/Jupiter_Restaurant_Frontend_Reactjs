@@ -1,4 +1,4 @@
-import React  from 'react';
+import React, {useState}  from 'react';
 
 
 const DishCard = (props) => {
@@ -18,7 +18,7 @@ const DishCard = (props) => {
     )
 }
 
-export const FormGroup = (props) => {
+const FormGroup = (props) => {
 
     return(
         <div className={"form-group"}>
@@ -41,7 +41,7 @@ export const FormGroup = (props) => {
     )
 }
 
-export const ArrayInputTags = (props) => {
+const ArrayInputTags = (props) => {
     return(
         <div>
             <label htmlFor={props.id} style={{color:"#00635a"}}>{props.show}</label>
@@ -79,72 +79,44 @@ export const ArrayInputTags = (props) => {
 }
 
 
-// const LoginAndRegister = (props) => {
-//
-//     const login = (event) => {
-//
-//         event.preventDefault();
-//
-//         props.history.push('/login');
-//
-//     }
-//
-//     return(
-//         <>
-//             <button onClick={login}>login</button>
-//             <br/>
-//             <p>don't have account?register here</p>
-//         </>
-//     )
-// }
+const Dropdown = (props) => {
+    const [isOpen, setIsOpen] = useState("");
+    const [selection, setSelection] = useState("customer");
 
-// const CarouselLSY = (props) => {
-//
-//     const [activeIndex, setActiveIndex] = useState(0);
-//     const [animating, setAnimating] = useState(false);
-//
-//     const next = () => {
-//         if (animating) return;
-//         const nextIndex = activeIndex === props.items.length - 1 ? 0 : activeIndex + 1;
-//         setActiveIndex(nextIndex);
-//     }
-//
-//     const previous = () => {
-//         if (animating) return;
-//         const nextIndex = activeIndex === 0 ? props.items.length - 1 : activeIndex - 1;
-//         setActiveIndex(nextIndex);
-//     }
-//
-//     const goToIndex = (newIndex) => {
-//         if (animating) return;
-//         setActiveIndex(newIndex);
-//     }
-//
-//     const slides = props.items.map((item) => {
-//         return (
-//             <CarouselItem
-//                 onExiting={() => setAnimating(true)}
-//                 onExited={() => setAnimating(false)}
-//                 key={item.src}
-//             >
-//                 <img src={item.src} alt={item.altText} />
-//                 <CarouselCaption captionText={item.caption} captionHeader={item.caption} />
-//             </CarouselItem>
-//         );
-//     });
-//
-//     return (
-//         <Carousel
-//             activeIndex={activeIndex}
-//             next={next}
-//             previous={previous}
-//         >
-//             <CarouselIndicators items={props.items} activeIndex={activeIndex} onClickHandler={goToIndex} />
-//             {slides}
-//             <CarouselControl direction="prev" directionText="Previous" onClickHandler={previous} />
-//             <CarouselControl direction="next" directionText="Next" onClickHandler={next} />
-//         </Carousel>
-//     );
-// }
+    return(
+        <div className={"d-flex flex-column"}>
+            <label style={{color:"#00635a", margin: 0}}>{props.show}</label>
+            <div className={"dropdown d-flex justify-content-center"}>
+                <button className="btn btn-secondary btn-sm dropdown-toggle" id="dropdownMenuLink"
+                        onClick={(event) => {
+                            event.preventDefault();
+                            if(isOpen === "") setIsOpen("show");
+                            else setIsOpen("")
+                        }}>
+                    {selection}
+                </button>
+
+                <div className={"dropdown-menu " + isOpen} onClick={props.selectedItemFromDropdown}>
+                    {(props.dropdownItems || []).map(item => (
+                        <button
+                            key={item}
+                            id={item}
+                            className="dropdown-item btn-sm"
+                            style={{paddingLeft:5, paddingTop: 3, paddingBottom: 3}}
+                            onClick={((event) => {
+                                event.preventDefault();
+                                setSelection(event.target.id);
+                                setIsOpen("");
+                            })}>
+                            {item}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+
+    )
+}
 
 export default DishCard;
+export {FormGroup, ArrayInputTags, Dropdown};
