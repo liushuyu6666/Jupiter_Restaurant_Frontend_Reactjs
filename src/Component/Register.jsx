@@ -274,7 +274,8 @@ class Register extends Component{
                         id={"role"}
                         show={"role"}
                         dropdownItems={this.roles}
-                        selectedItemFromDropdown={this.selectedItemFromDropdown}/>
+                        selectedItemFromDropdown={this.selectedItemFromDropdown}
+                    />
                     <p className={"text-center"} style={{color:this.state.errorsFromServer.color}}>
                         {this.state.errorsFromServer.value}
                     </p>

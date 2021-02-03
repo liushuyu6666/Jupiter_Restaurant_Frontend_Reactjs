@@ -1,5 +1,6 @@
 import React, {Component} from "react";
 import {withRouter} from "react-router-dom";
+import {Dropdown, FormGroup} from "./Widgets";
 
 class Login extends Component{
     constructor(props) {
@@ -7,10 +8,13 @@ class Login extends Component{
         this.state = {
             formValue: {username : "", password : "", role : "customer"},
             errors: {value: "", color: "red"},
-            errorsFromServer: {value: "", color: "red"}
+            errorsFromServer: {value: "", color: ""},
+            buttonEnabled: false,
         }
+        this.roles = ["customer", "owner", "admin"]
     }
 
+    // change values of input except role value
     change = (event) => {
         event.preventDefault();
 
@@ -18,19 +22,36 @@ class Login extends Component{
             formValue:{
                 ...this.state.formValue,
                 [event.target.id] : event.target.value,
-            }
-        })
+            },
+            errorsFromServer: {value: "", color: ""},
+        }, () => this.check())
     }
 
-    radio = (event) => {
-
-        // clear errorsFromServer and fill in the radio values
+    // change values of role value, listen which role is selected
+    selectedItemFromDropdown = (event) =>{
+        event.preventDefault();
         this.setState({
-            formValue:{
+            formValue: {
                 ...this.state.formValue,
-                role: event.target.id
+                role: event.target.id,
             },
-        }, )
+            errorsFromServer: {value: "", color: ""},
+        }, () => this.check());
+    }
+
+    check = () => {
+        if(this.state.formValue.username.trim() === ""
+        || this.state.formValue.password.trim() === ""
+        || this.state.errorsFromServer.color.trim() !== ""){
+            this.setState({
+                buttonEnabled: false
+            })
+        }
+        else{
+            this.setState({
+                buttonEnabled: true
+            })
+        }
     }
 
     submit = (event) => {
@@ -81,60 +102,46 @@ class Login extends Component{
 
     render(){
         return(
-            <form>
-                <h4>login</h4>
-                <div className={"form-group"}>
-                    <label htmlFor={"username"}>username:</label>
-                    <input
-                        className={"form-control"}
-                        type={"text"}
+            <form className={"d-flex justify-content-around"}>
+                <div>
+
+                </div>
+                <div className={"d-flex flex-column"}>
+                    <h4 className={"d-flex"}
+                        style={{color:"#00635a"}}><strong>login</strong>
+                    </h4>
+                    <FormGroup
                         id={"username"}
-                        name={"username"} // to pair label
-                        onChange={this.change}
+                        inputValue={this.state.formValue["username"]}
+                        show={"username"}
+                        type={"text"}
+                        change={this.change}
                     />
-                </div>
-                <div className={"form-group"}>
-                    <label htmlFor={"password"}>password:</label>
-                    <input
-                        className={"form-control"}
-                        type={"password"}
+                    <FormGroup
                         id={"password"}
-                        name={"password"} // to pair label
-                        onChange={this.change}
+                        inputValue={this.state.formValue["password"]}
+                        show={"password"}
+                        type={"password"}
+                        change={this.change}
                     />
-                </div>
-                <div className={"form-group"} onChange={this.radio}>
-                    <label>register as:</label>
-                    <br/>
-                    <div className="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="customer" name="role"
-                               className="custom-control-input" defaultChecked/>
-                        <label className="custom-control-label" htmlFor="customer">
-                            a customer
-                        </label>
-                    </div>
-                    <div className="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="owner" name="role"
-                               className="custom-control-input"/>
-                        <label className="custom-control-label" htmlFor="owner">
-                            a shop owner
-                        </label>
-                    </div>
-                    <div className="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="admin" name="role"
-                               className="custom-control-input"/>
-                        <label className="custom-control-label" htmlFor="admin">
-                            an admin
-                        </label>
+                    <Dropdown
+                        id={"role"}
+                        show={"role"}
+                        dropdownItems={this.roles}
+                        selectedItemFromDropdown={this.selectedItemFromDropdown}
+                    />
+                    <p className={"text-center"} style={{color:this.state.errorsFromServer.color}}>
+                        {this.state.errorsFromServer.value}
+                    </p>
+                    <div className={"form-group"}>
+                        <button type="button"
+                                className={"btn btn-primary btn-sm active"}
+                                disabled={!this.state.buttonEnabled}
+                                onClick={this.submit}>login</button>
                     </div>
                 </div>
-                <p className={"text-center"} style={{color:this.state.errorsFromServer.color}}>
-                    {this.state.errorsFromServer.value}
-                </p>
-                <div className={"form-group"}>
-                    <button type="button"
-                            className="btn btn-primary"
-                            onClick={this.submit}>login</button>
+                <div>
+
                 </div>
             </form>
         )
