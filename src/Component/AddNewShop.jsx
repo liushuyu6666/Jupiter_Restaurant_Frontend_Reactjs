@@ -190,7 +190,7 @@ class AddNewShop extends Component{
     submit = (event) => {
         event.preventDefault();
         this.setState({
-            errorsFromSever: {value: "please wait...", color: "green"}
+            errorsFromServer: {value: "please wait...", color: "green"}
         },() => {
             // verify token and get profile
             const formData = new FormData();
@@ -206,6 +206,7 @@ class AddNewShop extends Component{
                     if(data.result === null){
                         this.setState({
                             errorsFromServer: {value: data.msg, color: "red"},
+                            buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false}
                         })
                     }
                     // if upload image properly, upload the entire form
@@ -223,11 +224,11 @@ class AddNewShop extends Component{
                                 "city": this.state.formValue.city,
                                 "street": this.state.formValue.street},
                         }
-                        console.log(form);
                         fetch("/v1/shops",{
                             "method": "POST",
                             "headers": {
                                 "Content-Type": "application/json",
+                                "token": localStorage.getItem("token"),
                             },
                             "body": JSON.stringify({
                                 "name": this.state.formValue.name,
@@ -244,105 +245,27 @@ class AddNewShop extends Component{
                         .then(data => {
                             if(data.result === null){
                                 this.setState({
-                                    errorsFromSever: {value: data.msg, color: "red"},
+                                    errorsFromServer: {value: data.msg, color: "red"},
                                     buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false}
                                 })
                             }
                             else{
                                 this.setState({
-                                    errorsFromSever: {value: data.msg, color: "green"}
+                                    errorsFromServer: {value: data.msg, color: "green"},
+                                    buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false}
                                 })
                             }
                         })
                         .catch(e => {
                             this.setState({
-                                errorsFromSever: {value: e.msg, color: "red"},
+                                errorsFromServer: {value: e.msg, color: "red"},
                                 buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false}
                             })
                         })
                     }
                 })
         })
-        // // verify token and get profile
-        // const formData = new FormData();
-        // formData.append("file", this.state.formValue.img);
-        // formData.append("name", this.state.formValue.name);
-        // fetch("/v1/files",{
-        //     "method": "POST",
-        //     "body": formData,
-        //     "redirect": "follow",
-        // })
-        // .then(res => res.json())
-        // .then(data => {
-        //     if(data.result === null){
-        //         this.setState({
-        //             errorsFromServer: {value: data.msg, color: "red"},
-        //         })
-        //     }
-        //     // if upload image properly, upload the entire form
-        //     else{
-        //         const ownersListFinal = Array.from(new Set(this.state.ownersList
-        //                                 .push(this.state.firstAuthentication.loginName)))
-        //         const form = {"name": this.state.formValue.name,
-        //             "desc": this.state.formValue.desc,
-        //             "imgUrl": data.result,
-        //             "categories": this.state.categoriesList,
-        //             "owners" :ownersListFinal,
-        //             "address": {"country": this.state.formValue.country,
-        //                         "city": this.state.formValue.city,
-        //                         "street": this.state.formValue.street},
-        //         }
-        //         fetch("/v1/shops",{
-        //             "method": "POST",
-        //             "body": form,
-        //         })
-        //             .then(res => res.json())
-        //             .then(data => {
-        //                 if(data.result === null){
-        //                     this.setState({
-        //                         errorsFromSever: {value: data.msg, color: "red"},
-        //                         buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false}
-        //                     })
-        //                 }
-        //                 else{
-        //                     this.setState({
-        //                         errorsFromSever: {value: data.msg, color: "green"}
-        //                     })
-        //                 }
-        //             })
-        //     }
-        // })
     }
-
-    // verifyTokenAndGetProfile = () => {
-    //     let token = localStorage.getItem("token");
-    //     // need to check user's role first
-    //     fetch("/v1/profile",{
-    //         "method": "GET",
-    //         "headers": {
-    //             "Content-Type": "application/json",
-    //             "token": token,
-    //         },
-    //     })
-    //         .then(res => res.json())
-    //         .then(data => {
-    //             if(data.result === null){
-    //                 this.setState({
-    //                     firstAuthentication: {isValid: false, errorMsg: data.msg}
-    //                 })
-    //             }
-    //             else if(data.result.role !== "owner"){
-    //                 this.setState({
-    //                     firstAuthentication: {isValid: false, errorMsg: "only owner can access"}
-    //                 })
-    //             }
-    //             else{
-    //                 this.setState({
-    //                     firstAuthentication: {isValid: true, errorMsg: ""}
-    //                 })
-    //             }
-    //         })
-    // }
 
     render() {
         return(
@@ -455,13 +378,12 @@ class AddNewShop extends Component{
     }
 
     componentDidMount() {
-        let token = localStorage.getItem("token");
         // need to check user's role first
         fetch("/v1/profile",{
             "method": "GET",
             "headers": {
                 "Content-Type": "application/json",
-                "token": token,
+                "token": localStorage.getItem("token")
             },
         })
             .then(res => res.json())
