@@ -147,11 +147,14 @@ const ErrorFromServer = (props) => {
 const CollapseElement = (props) => {
 
     const [isOpen, setIsOpen] =
-        useState({"good restaurant": {button: "btn btn-link collapsed",
-                                                collapse: "collapse",
-                                                status: false,
-                                                height: 100}
-                                                    });
+        useState({
+            "good restaurant":
+                {button: "btn btn-link collapsed",
+                 collapse: "collapse",
+                 status: false,
+                 buttonEnabled: true}
+        });
+    const animation = false;
 
     return (
         <div id="accordion">
@@ -162,40 +165,49 @@ const CollapseElement = (props) => {
                             className={isOpen["good restaurant"].button}
                             data-toggle="collapse"
                             data-target="#collapseOne"
-                            aria-expanded={isOpen["good restaurant"].status}
-                            onClick={() => {
+                            disabled={!isOpen["good restaurant"].buttonEnabled}
+                            onClick={(event) => {
+                                event.preventDefault();
                                 if(!isOpen["good restaurant"].status) {
+                                    console.log("is opening");
                                     setIsOpen({
                                         ...isOpen,
                                         "good restaurant":
                                             {button: "btn btn-link collapsed",
-                                                collapse: "collapsing",
-                                                status: false}
+                                             collapse: "collapsing",
+                                             status: true,
+                                             buttonEnabled: false,
+                                             height: 1000}
                                     });
-                                    setIsOpen({
-                                        ...isOpen,
-                                        "good restaurant":
-                                            {button: "btn btn-link",
-                                            collapse: "collapse show",
-                                            status: true,
-                                            height: 100}
-                                    });
+                                    setTimeout(() => {
+                                        setIsOpen({
+                                            ...isOpen,
+                                            "good restaurant":
+                                                {button: "btn btn-link",
+                                                 collapse: "collapse show",
+                                                 status: true,
+                                                 buttonEnabled: true,
+                                                 height: 1000}
+                                        });
+                                    }, 300);
                                 }
                                 else {
                                     setIsOpen({
                                         ...isOpen,
                                         "good restaurant":
                                             {button: "btn btn-link collapsed",
-                                                collapse: "collapsing",
-                                                status: false}
+                                             collapse: "collapsing",
+                                             status: false,
+                                             buttonEnabled: false}
                                     });
                                     setTimeout(() => {
                                         setIsOpen({
                                             ...isOpen,
                                             "good restaurant":
-                                                {button: "btn btn-link collapsed",
-                                                    collapse: "collapse",
-                                                    status: false}
+                                                {button: "btn btn-link",
+                                                 collapse: "collapse",
+                                                 status: false,
+                                                 buttonEnabled: true}
                                         });
                                     }, 300);
                                 }}
@@ -211,6 +223,52 @@ const CollapseElement = (props) => {
                     data-parent="#accordion"
                     style={{height: isOpen["good restaurant"].height}}>
                     <div className="card-body">
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
                         Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
                         of them accusamus labore sustainable VHS.
                     </div>
