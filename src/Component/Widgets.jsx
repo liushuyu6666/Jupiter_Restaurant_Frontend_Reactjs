@@ -135,5 +135,149 @@ const NoPermissionPage = (props) => {
     )
 }
 
+const ErrorFromServer = (props) => {
+    return(
+        <p className={"text-center"} style={{color:props.color}}>
+            {props.value}
+        </p>
+    )
+}
+
+const Collapse = (props) => {
+
+    const [isOpen, setIsOpen] =
+        useState({"good restaurant": {button: "btn btn-link collapsed",
+                                                collapse: "collapse",
+                                                status: false},
+                            "bad restaurant":{button: "btn btn-link collapsed",
+                                              collapse: "collapse",
+                                              status: false}
+                                                    });
+
+    return (
+        <div id="accordion">
+            <div className="card">
+                <div className="card-header" id="headingOne">
+                    <h5 className="mb-0">
+                        <button
+                            className={isOpen["good restaurant"].button}
+                            data-toggle="collapse"
+                            data-target="#collapseOne"
+                            aria-expanded={isOpen["good restaurant"].status}
+                            onClick={() => {
+                                if(!isOpen["good restaurant"].status) {
+                                    setIsOpen({
+                                        ...isOpen,
+                                        "good restaurant":
+                                            {button: "btn btn-link",
+                                            collapse: "collapsing",
+                                            status: true}
+                                    });
+                                    setTimeout(() => {
+                                        setIsOpen({
+                                            ...isOpen,
+                                            "good restaurant":
+                                                {button: "btn btn-link",
+                                                    collapse: "collapse show",
+                                                    status: true}
+                                        });
+                                    }, 1000);
+                                }
+                                else {
+                                    setIsOpen({
+                                        ...isOpen,
+                                        "good restaurant":
+                                            {button: "btn btn-link collapsed",
+                                                collapse: "collapsing",
+                                                status: false}
+                                    });
+                                    setTimeout(() => {
+                                        setIsOpen({
+                                            ...isOpen,
+                                            "good restaurant":
+                                                {button: "btn btn-link collapsed",
+                                                    collapse: "collapse",
+                                                    status: false}
+                                        });
+                                    }, 1000);
+                                }}
+                            }
+                        >
+                            Collapsible Group Item #1
+                        </button>
+                    </h5>
+                </div>
+                <div
+                    id="collapseOne"
+                    className={isOpen["good restaurant"].collapse}
+                    data-parent="#accordion">
+                    <div className="card-body">
+                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
+                        of them accusamus labore sustainable VHS.
+                    </div>
+                </div>
+            </div>
+
+            <div className="card">
+                <div className="card-header" id="headingTwo">
+                    <h5 className="mb-0">
+                        <button
+                            className={isOpen["bad restaurant"].button}
+                            data-toggle="collapse"
+                            data-target="#collapseOne"
+                        >
+                            Collapsible Group Item #1
+                        </button>
+                    </h5>
+                </div>
+                <div
+                    id="collapseTwo"
+                    className={isOpen["bad restaurant"].collapse}
+                    data-parent="#accordion">
+                    <div className="card-body">
+                        Anim pariatur
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+const VerifyTokenAndGetProfile = (props) => {
+    let token = localStorage.getItem("token");
+    // need to check user's role first
+    fetch("/v1/profile",{
+        "method": "GET",
+        "headers": {
+            "Content-Type": "application/json",
+            "token": token,
+        },
+    })
+        .then(res => res.json())
+        .then(data => {
+            if(data.result === null){
+                return null;
+            }
+            else if(data.result.role !== "owner"){
+                this.setState({
+                    firstAuthentication: {isValid: false, errorMsg: "only owner can access"}
+                })
+            }
+            else{
+                this.setState({
+                    firstAuthentication: {isValid: true, errorMsg: ""}
+                })
+            }
+        })
+}
+
+
+
 export default DishCard;
-export {FormGroup, ArrayInputTags, Dropdown, NoPermissionPage};
+export {FormGroup,
+    ArrayInputTags,
+    Dropdown,
+    NoPermissionPage,
+    ErrorFromServer,
+    VerifyTokenAndGetProfile,
+    Collapse};
