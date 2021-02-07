@@ -1,4 +1,5 @@
 import React, {useState}  from 'react';
+import Collapse from 'react-bootstrap/Collapse'
 
 
 const DishCard = (props) => {
@@ -143,15 +144,13 @@ const ErrorFromServer = (props) => {
     )
 }
 
-const Collapse = (props) => {
+const CollapseElement = (props) => {
 
     const [isOpen, setIsOpen] =
         useState({"good restaurant": {button: "btn btn-link collapsed",
                                                 collapse: "collapse",
-                                                status: false},
-                            "bad restaurant":{button: "btn btn-link collapsed",
-                                              collapse: "collapse",
-                                              status: false}
+                                                status: false,
+                                                height: 100}
                                                     });
 
     return (
@@ -169,19 +168,18 @@ const Collapse = (props) => {
                                     setIsOpen({
                                         ...isOpen,
                                         "good restaurant":
-                                            {button: "btn btn-link",
-                                            collapse: "collapsing",
-                                            status: true}
+                                            {button: "btn btn-link collapsed",
+                                                collapse: "collapsing",
+                                                status: false}
                                     });
-                                    setTimeout(() => {
-                                        setIsOpen({
-                                            ...isOpen,
-                                            "good restaurant":
-                                                {button: "btn btn-link",
-                                                    collapse: "collapse show",
-                                                    status: true}
-                                        });
-                                    }, 1000);
+                                    setIsOpen({
+                                        ...isOpen,
+                                        "good restaurant":
+                                            {button: "btn btn-link",
+                                            collapse: "collapse show",
+                                            status: true,
+                                            height: 100}
+                                    });
                                 }
                                 else {
                                     setIsOpen({
@@ -199,7 +197,7 @@ const Collapse = (props) => {
                                                     collapse: "collapse",
                                                     status: false}
                                         });
-                                    }, 1000);
+                                    }, 300);
                                 }}
                             }
                         >
@@ -210,32 +208,11 @@ const Collapse = (props) => {
                 <div
                     id="collapseOne"
                     className={isOpen["good restaurant"].collapse}
-                    data-parent="#accordion">
+                    data-parent="#accordion"
+                    style={{height: isOpen["good restaurant"].height}}>
                     <div className="card-body">
                         Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
                         of them accusamus labore sustainable VHS.
-                    </div>
-                </div>
-            </div>
-
-            <div className="card">
-                <div className="card-header" id="headingTwo">
-                    <h5 className="mb-0">
-                        <button
-                            className={isOpen["bad restaurant"].button}
-                            data-toggle="collapse"
-                            data-target="#collapseOne"
-                        >
-                            Collapsible Group Item #1
-                        </button>
-                    </h5>
-                </div>
-                <div
-                    id="collapseTwo"
-                    className={isOpen["bad restaurant"].collapse}
-                    data-parent="#accordion">
-                    <div className="card-body">
-                        Anim pariatur
                     </div>
                 </div>
             </div>
@@ -280,4 +257,4 @@ export {FormGroup,
     NoPermissionPage,
     ErrorFromServer,
     VerifyTokenAndGetProfile,
-    Collapse};
+    CollapseElement};
