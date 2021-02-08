@@ -1,5 +1,4 @@
 import React, {useState}  from 'react';
-import Collapse from 'react-bootstrap/Collapse'
 
 
 const DishCard = (props) => {
@@ -37,6 +36,26 @@ const FormGroup = (props) => {
             />
             <div className={props.promptClassname}>
                 {props.promptText}
+            </div>
+        </div>
+    )
+}
+
+const ArrayTags = (props) => {
+    return(
+        <div>
+            <label htmlFor={props.id} style={{color:"#00635a"}}>{props.show}</label>
+            <div className={"container"} id={"tagGroup"}>
+                <div className={"row"}>
+                    {(props.arrayValues || []).map(item => (
+                        <button
+                            key={props.id + "-" + item}
+                            className="btn btn-outline-success col-6-sm"
+                            value={item}>
+                            {item}
+                        </button>
+                    ))}
+                </div>
             </div>
         </div>
     )
@@ -144,139 +163,6 @@ const ErrorFromServer = (props) => {
     )
 }
 
-const CollapseElement = (props) => {
-
-    const [isOpen, setIsOpen] =
-        useState({
-            "good restaurant":
-                {button: "btn btn-link collapsed",
-                 collapse: "collapse",
-                 status: false,
-                 buttonEnabled: true}
-        });
-    const animation = false;
-
-    return (
-        <div id="accordion">
-            <div className="card">
-                <div className="card-header" id="headingOne">
-                    <h5 className="mb-0">
-                        <button
-                            className={isOpen["good restaurant"].button}
-                            data-toggle="collapse"
-                            data-target="#collapseOne"
-                            disabled={!isOpen["good restaurant"].buttonEnabled}
-                            onClick={(event) => {
-                                event.preventDefault();
-                                if(!isOpen["good restaurant"].status) {
-                                    console.log("is opening");
-                                    setIsOpen({
-                                        ...isOpen,
-                                        "good restaurant":
-                                            {button: "btn btn-link collapsed",
-                                             collapse: "collapsing",
-                                             status: true,
-                                             buttonEnabled: false,
-                                             height: 1000}
-                                    });
-                                    setTimeout(() => {
-                                        setIsOpen({
-                                            ...isOpen,
-                                            "good restaurant":
-                                                {button: "btn btn-link",
-                                                 collapse: "collapse show",
-                                                 status: true,
-                                                 buttonEnabled: true,
-                                                 height: 1000}
-                                        });
-                                    }, 300);
-                                }
-                                else {
-                                    setIsOpen({
-                                        ...isOpen,
-                                        "good restaurant":
-                                            {button: "btn btn-link collapsed",
-                                             collapse: "collapsing",
-                                             status: false,
-                                             buttonEnabled: false}
-                                    });
-                                    setTimeout(() => {
-                                        setIsOpen({
-                                            ...isOpen,
-                                            "good restaurant":
-                                                {button: "btn btn-link",
-                                                 collapse: "collapse",
-                                                 status: false,
-                                                 buttonEnabled: true}
-                                        });
-                                    }, 300);
-                                }}
-                            }
-                        >
-                            Collapsible Group Item #1
-                        </button>
-                    </h5>
-                </div>
-                <div
-                    id="collapseOne"
-                    className={isOpen["good restaurant"].collapse}
-                    data-parent="#accordion"
-                    style={{height: isOpen["good restaurant"].height}}>
-                    <div className="card-body">
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                        Anim pariatur cliche reprehenderit, nim aesthetic synth nesciunt you probably haven't heard
-                        of them accusamus labore sustainable VHS.
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
 
 const VerifyTokenAndGetProfile = (props) => {
     let token = localStorage.getItem("token");
@@ -310,9 +196,9 @@ const VerifyTokenAndGetProfile = (props) => {
 
 export default DishCard;
 export {FormGroup,
+    ArrayTags,
     ArrayInputTags,
     Dropdown,
     NoPermissionPage,
     ErrorFromServer,
-    VerifyTokenAndGetProfile,
-    CollapseElement};
+    VerifyTokenAndGetProfile};
