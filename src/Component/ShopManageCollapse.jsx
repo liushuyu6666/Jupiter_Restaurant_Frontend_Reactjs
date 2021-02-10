@@ -1,8 +1,9 @@
 import React, {Component} from "react/";
 import {FormGroup, ArrayTags, ArrayInputTags, ErrorFromServer} from "./Widgets";
+import { Accordion, Card, Button } from "react-bootstrap";
 import ShopList from "./ShopList";
 
-class ShopManageCollapse extends {Component, ShopList}{
+class ShopManageCollapse extends Component{
     constructor(props) {
         super(props);
         this.state = {
@@ -27,6 +28,8 @@ class ShopManageCollapse extends {Component, ShopList}{
                 ownerAddButtonEnable: false
             },
             errorsFromServer: {value: "", color: ""},
+            isListPage: true,
+            newImage: null,
         }
     }
 
@@ -39,6 +42,16 @@ class ShopManageCollapse extends {Component, ShopList}{
             }
         }, () => {
             this.check(event)
+        })
+    }
+
+    // listen to image change
+    imageChange = (event) => {
+        const file = event.target.files[0];
+        this.setState({
+                newImage: file,
+        }, () => {
+            this.check(event);
         })
     }
 
@@ -120,6 +133,16 @@ class ShopManageCollapse extends {Component, ShopList}{
             owner.addStatus = true;
         }
 
+        // check img
+        if(this.state.newImage != null){
+            const uploadType = this.state.newImage.type;
+            if(uploadType.substr(0, uploadType.indexOf('/')) !== "image"){
+                img.classname = "is-invalid";
+                img.promptClassname = "invalid-feedback";
+                img.promptText = "must be image";
+            }
+        }
+
         change = {name: name, category: category, owner: owner, img: img};
 
         // update the state
@@ -168,10 +191,7 @@ class ShopManageCollapse extends {Component, ShopList}{
         }, () => this.check(event))
     }
 
-
-
-
-
+    // click functions
     clickCollapse = (event) => {
         event.preventDefault();
         if(!this.state.isOpen.status) {
@@ -220,170 +240,181 @@ class ShopManageCollapse extends {Component, ShopList}{
     clickManage = (event) => {
         event.preventDefault();
         this.setState({
-            readOnly: !this.state.readOnly,
+            isListPage: !this.state.isListPage,
         })
     }
 
     clickSave = (event) => {
         event.preventDefault();
+        this.setState({
+            errorsFromServer: {value: "please wait...", color: "green"},
+            buttonEnable: {...this.state.buttonEnable, saveButtonEnable:false}
+        }, () => {
+            // upload image if owner upload new image
+            if(this.state.newImage){
+
+            }
+        })
 
     }
 
     render() {
         return (
             <div id={this.state.formValue._id}>
-                <div className="card">
-                    <div className="card-header" id={`heading_${this.state.formValue._id}`}
-                         style={{backgroundColor: "#00635a"}}>
+                <Card key={this.props.uniqueKey}>
+                    <Card.Header style={{backgroundColor: "#609E99"}}>
                         <h5 className="mb-0 d-flex justify-content-between">
-                            <button
+                            <Accordion.Toggle as={Button} variant="link" eventKey={this.props.eventKey}
                                 className={`${this.state.isOpen.button}`}
-                                data-toggle="collapse"
-                                data-target="#collapseOne"
+                                // data-toggle="collapse"
+                                // data-target="#collapseOne"
                                 disabled={!this.state.isOpen.buttonEnabled}
                                 style={{color: "white"}}
                                 onClick={this.clickCollapse}>
                                 {this.state.formValue.name}
-                            </button>
+                            </Accordion.Toggle>
                             <button
                                 className={"btn btn-link"}
                                 style={{color: "white"}}>
                                 {`${this.state.formValue.city}, ${this.state.formValue.country}`}
                             </button>
                         </h5>
-                    </div>
-                    <div
-                        id={`collapse_${this.state.formValue._id}`}
-                        className={this.state.isOpen.collapse}
-                        data-parent="#accordion"
-                        style={{height: this.state.isOpen.height}}>
-                        <div className="card-body d-flex flex-column">
-                            {
-                                (this.state.readOnly)?
-                                    // check detail
-                                (<>
-                                    <div className={"d-flex justify-content-around"}>
-                                        <div className={"d-flex flex-column"}>
-                                            <FormGroup id={"street"}
-                                                       inputValue={this.state.formValue.street}
-                                                       show={"street"}
-                                                       type={"text"}
-                                                       change={() => {}}/>
-                                            <ArrayTags id={"category"}
-                                                       show={"categories"}
-                                                       arrayValues={this.state.categoriesList}/>
-                                            <ArrayTags id={"owner"}
-                                                       show={"owners"}
-                                                       arrayValues={this.state.ownersList}/>
-                                        </div>
-                                        <img
-                                            src={this.state.formValue.imgUrl}
-                                            alt={this.state.formValue.name}
-                                            width="200" height="120"/>
-                                    </div>
-                                    <div className={"d-flex justify-content-center"}>
-                                        <FormGroup id={"desc"}
-                                                   inputValue={this.state.formValue.desc}
-                                                   show={"desc"}
-                                                   type={"text"}
-                                                   change={() => {}}/>
-                                    </div>
-                                    <div className={"d-flex justify-content-around"}>
-                                        <button
-                                            className={"btn btn-primary btn-sm active"}
-                                            onClick={this.clickManage}>
-                                            manage
-                                        </button>
-                                        <button className={"btn btn-primary btn-sm active"}>
-                                            check dishes
-                                        </button>
-                                    </div>
-                                </>):
-                                    // update
-                                (<>
-                                    <div className={"d-flex justify-content-around"}>
-                                        <div className={"d-flex flex-column"}>
-                                            <FormGroup id={"name"}
-                                                       inputValue={this.state.formValue["name"]}
-                                                       show={"name"}
-                                                       type={"text"}
-                                                       className={this.state.error.name.classname}
-                                                       promptClassname={this.state.error.name.promptClassname}
-                                                       promptText={this.state.error.name.promptText}
-                                                       change={this.change}/>
-                                            <FormGroup id={"country"}
-                                                       inputValue={this.state.formValue.country}
-                                                       show={"country"}
-                                                       type={"text"}
-                                                       change={this.change}/>
-                                            <FormGroup id={"city"}
-                                                       inputValue={this.state.formValue.city}
-                                                       show={"city"}
-                                                       type={"text"}
-                                                       change={this.change}/>
-                                            <FormGroup id={"street"}
-                                                       inputValue={this.state.formValue.street}
-                                                       show={"street"}
-                                                       type={"text"}
-                                                       change={this.change}/>
-                                        </div>
-                                        <div className={"d-flex flex-column"}>
+                    </Card.Header>
+                    <Accordion.Collapse eventKey={this.props.eventKey}>
+                        <Card.Body key={this.props.uniqueKey}>
+                            <div className="card-body d-flex flex-column">
+                                {
+                                    (this.state.isListPage)?
+                                        // check detail
+                                    (<>
+                                        <div className={"d-flex justify-content-around"}>
+                                            <div className={"d-flex flex-column"}>
+                                                <FormGroup id={"street"}
+                                                           inputValue={this.state.formValue.street}
+                                                           show={"street"}
+                                                           type={"text"}
+                                                           change={() => {}}/>
+                                                <ArrayTags id={"category"}
+                                                           show={"categories"}
+                                                           arrayValues={this.state.categoriesList}/>
+                                                <ArrayTags id={"owner"}
+                                                           show={"owners"}
+                                                           arrayValues={this.state.ownersList}/>
+                                            </div>
                                             <img
                                                 src={this.state.formValue.imgUrl}
                                                 alt={this.state.formValue.name}
-                                                width="200" height="120"
-                                            />
-                                            <br/>
-                                            <ArrayInputTags show={"categories"}
-                                                            id={"category"} // should be the same as the key in the formValue of state
-                                                            arrayKey={"categoriesList"}
-                                                            arrayValues={this.state.categoriesList}
-                                                            inputValue={this.state.formValue["category"]}
-                                                            buttonEnable={this.state.buttonEnable.categoryAddButtonEnable}
-                                                            promptClassname={this.state.error.category.promptClassname}
-                                                            promptText={this.state.error.category.promptText}
-                                                            changeFunc={this.change}
-                                                            addFunc={this.arrayAdd}
-                                                            removeFunc={this.arrayRemove}
-                                            />
-                                            <ArrayInputTags show={"owners"}
-                                                            id={"owner"} // should be the same as the key in the formValue of state
-                                                            arrayKey={"ownersList"}
-                                                            arrayValues={this.state.ownersList}
-                                                            inputValue={this.state.formValue["owner"]}
-                                                            buttonEnable={this.state.buttonEnable.ownerAddButtonEnable}
-                                                            promptClassname={this.state.error.owner.promptClassname}
-                                                            promptText={this.state.error.owner.promptText}
-                                                            changeFunc={this.change}
-                                                            addFunc={this.arrayAdd}
-                                                            removeFunc={this.arrayRemove}
-                                            />
+                                                width="200" height="120"/>
                                         </div>
-                                    </div>
-                                    <div className={"d-flex justify-content-center"}>
-                                        <FormGroup id={"desc"}
-                                                   inputValue={this.state.formValue.desc}
-                                                   show={"description"}
-                                                   type={"text"}
-                                                   change={this.change}/>
-                                    </div>
-                                    <ErrorFromServer
-                                        value={this.state.errorsFromServer.value}
-                                        color={this.state.errorsFromServer.color}
-                                    />
-                                    <div className={"d-flex justify-content-around"}>
-                                        <button
-                                            className={"btn btn-primary btn-sm active"}
-                                            disabled={!this.state.buttonEnable.saveButtonEnable}
-                                            onClick={this.clickManage}>
-                                            save
-                                        </button>
-                                    </div>
-                                </>)
-                            }
-                        </div>
-                    </div>
-                </div>
+                                        <div className={"d-flex justify-content-center"}>
+                                            <FormGroup id={"desc"}
+                                                       inputValue={this.state.formValue.desc}
+                                                       show={"desc"}
+                                                       type={"text"}
+                                                       change={() => {}}/>
+                                        </div>
+                                        <div className={"d-flex justify-content-around"}>
+                                            <button
+                                                className={"btn btn-primary btn-sm active"}
+                                                onClick={this.clickManage}>
+                                                manage
+                                            </button>
+                                            <button className={"btn btn-primary btn-sm active"}>
+                                                check dishes
+                                            </button>
+                                        </div>
+                                    </>):
+                                        // update
+                                    (<>
+                                        <div className={"d-flex justify-content-around"}>
+                                            <div className={"d-flex flex-column"}>
+                                                <FormGroup id={"name"}
+                                                           inputValue={this.state.formValue["name"]}
+                                                           show={"name"}
+                                                           type={"text"}
+                                                           className={this.state.error.name.classname}
+                                                           promptClassname={this.state.error.name.promptClassname}
+                                                           promptText={this.state.error.name.promptText}
+                                                           change={this.change}/>
+                                                <FormGroup id={"country"}
+                                                           inputValue={this.state.formValue.country}
+                                                           show={"country"}
+                                                           type={"text"}
+                                                           change={this.change}/>
+                                                <FormGroup id={"city"}
+                                                           inputValue={this.state.formValue.city}
+                                                           show={"city"}
+                                                           type={"text"}
+                                                           change={this.change}/>
+                                                <FormGroup id={"street"}
+                                                           inputValue={this.state.formValue.street}
+                                                           show={"street"}
+                                                           type={"text"}
+                                                           change={this.change}/>
+                                            </div>
+                                            <div className={"d-flex flex-column"}>
+                                                <FormGroup
+                                                    id={"imgUrl"}
+                                                    // inputValue={this.state.formValue["imgUrl"]}
+                                                    show={"upload image"}
+                                                    type={"file"}
+                                                    className={this.state.error.img.classname}
+                                                    promptClassname={this.state.error.img.promptClassname}
+                                                    promptText={this.state.error.img.promptText}
+                                                    change={this.imageChange}
+                                                />
+                                                <br/>
+                                                <ArrayInputTags show={"categories"}
+                                                                id={"category"} // should be the same as the key in the formValue of state
+                                                                arrayKey={"categoriesList"}
+                                                                arrayValues={this.state.categoriesList}
+                                                                inputValue={this.state.formValue["category"]}
+                                                                buttonEnable={this.state.buttonEnable.categoryAddButtonEnable}
+                                                                promptClassname={this.state.error.category.promptClassname}
+                                                                promptText={this.state.error.category.promptText}
+                                                                changeFunc={this.change}
+                                                                addFunc={this.arrayAdd}
+                                                                removeFunc={this.arrayRemove}
+                                                />
+                                                <ArrayInputTags show={"owners"}
+                                                                id={"owner"} // should be the same as the key in the formValue of state
+                                                                arrayKey={"ownersList"}
+                                                                arrayValues={this.state.ownersList}
+                                                                inputValue={this.state.formValue["owner"]}
+                                                                buttonEnable={this.state.buttonEnable.ownerAddButtonEnable}
+                                                                promptClassname={this.state.error.owner.promptClassname}
+                                                                promptText={this.state.error.owner.promptText}
+                                                                changeFunc={this.change}
+                                                                addFunc={this.arrayAdd}
+                                                                removeFunc={this.arrayRemove}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className={"d-flex justify-content-center"}>
+                                            <FormGroup id={"desc"}
+                                                       inputValue={this.state.formValue.desc}
+                                                       show={"description"}
+                                                       type={"text"}
+                                                       change={this.change}/>
+                                        </div>
+                                        <ErrorFromServer
+                                            value={this.state.errorsFromServer.value}
+                                            color={this.state.errorsFromServer.color}
+                                        />
+                                        <div className={"d-flex justify-content-around"}>
+                                            <button
+                                                className={"btn btn-primary btn-sm active"}
+                                                disabled={!this.state.buttonEnable.saveButtonEnable}
+                                                onClick={this.clickSave}>
+                                                save
+                                            </button>
+                                        </div>
+                                    </>)
+                                }
+                            </div>
+                        </Card.Body>
+                    </Accordion.Collapse>
+                </Card>
             </div>
         )
     }

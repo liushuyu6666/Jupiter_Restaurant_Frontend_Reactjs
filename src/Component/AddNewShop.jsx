@@ -18,7 +18,7 @@ class AddNewShop extends Component{
             buttonEnable: {saveButtonEnable: false,
                      categoryAddButtonEnable: false,
                      ownerAddButtonEnable: false},
-            firstAuthentication: {errorMsg: "", isValid: true, loginName: ""},
+            firstAuthorization: {errorMsg: "", isValid: true, loginName: ""},
             errorsFromServer: {value: "", color: ""},
         }
     }
@@ -129,7 +129,7 @@ class AddNewShop extends Component{
         }
 
         // check img
-        if(this.state.formValue.img !== null){
+        if(this.state.formValue.img != null){
             const uploadType = this.state.formValue.img.type;
             if(uploadType.substr(0, uploadType.indexOf('/')) !== "image"){
                 img.classname = "is-invalid";
@@ -192,10 +192,10 @@ class AddNewShop extends Component{
         this.setState({
             errorsFromServer: {value: "please wait...", color: "green"}
         },() => {
-            // verify token and get profile
+            // don't check token when upload image to S3
             const formData = new FormData();
             formData.append("file", this.state.formValue.img);
-            formData.append("name", this.state.formValue.name);
+            formData.append("name", "shop|" + this.state.formValue.name);
             fetch("/v1/files",{
                 "method": "POST",
                 "body": formData,
@@ -213,7 +213,7 @@ class AddNewShop extends Component{
                     else{
                         const ownersListFinal = Array.from(new Set(
                             [...this.state.ownersList,
-                            this.state.firstAuthentication.loginName]))
+                            this.state.firstAuthorization.loginName]))
                         const form = {
                             "name": this.state.formValue.name,
                             "desc": this.state.formValue.desc,
@@ -269,8 +269,8 @@ class AddNewShop extends Component{
 
     render() {
         return(
-                !this.state.firstAuthentication.isValid?
-                    (<NoPermissionPage message={this.state.firstAuthentication.errorMsg}/>):
+                !this.state.firstAuthorization.isValid?
+                    (<NoPermissionPage message={this.state.firstAuthorization.errorMsg}/>):
                 (<form className={"d-flex flex-column"}>
                     <h4 className={"d-flex justify-content-center"}
                         style={{color: "#00635a"}}><strong>add the shop information</strong></h4>
@@ -388,20 +388,20 @@ class AddNewShop extends Component{
         })
             .then(res => res.json())
             .then(data => {
-                if(data.result === null){
+                if(data.result == null){
                     this.setState({
-                        firstAuthentication: {isValid: false, errorMsg: data.msg}
+                        firstAuthorization: {isValid: false, errorMsg: data.msg}
                     })
                 }
                 else if(data.result.role !== "owner"){
                     this.setState({
-                        firstAuthentication: {isValid: false, errorMsg: "only owner can access"}
+                        firstAuthorization: {isValid: false, errorMsg: "only owner can access"}
                     })
                 }
                 else{
                     // console.log(data.result);
                     this.setState({
-                        firstAuthentication: {isValid: true,
+                        firstAuthorization: {isValid: true,
                             errorMsg: "",
                             loginName: data.result.username}
                     })
