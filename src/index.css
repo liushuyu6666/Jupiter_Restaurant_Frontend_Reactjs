@@ -7,7 +7,46 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* container */
+
+.homepage-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 300px);
+  place-content: center;
+  column-gap: 40px;
+  row-gap: 40px;
+}
+
+.homepage-tags-container{
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-rows: 21px;
+  place-content: start;
+  column-gap: 2px;
+}
+
+.shopListPage-container{
+  display: grid;
+  grid-template-columns: 80px auto 80px;
+  grid-template-rows: 15px auto;
+}
+
+.shopListPage-collapse{
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: 20px;
+  grid-row: 2;
+  grid-column: 2/3;
+}
+
+.shopListPage-header{
+  grid-column: 1/4;
+  grid-row: 1/2;
+  background: #00635A;
 }

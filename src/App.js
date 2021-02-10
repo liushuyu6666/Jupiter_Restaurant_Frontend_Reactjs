@@ -11,7 +11,9 @@ import Register from "./Component/Register";
 import Login from "./Component/Login";
 import FlexTest from "./Component/FlexTest";
 import AddNewShop from "./Component/AddNewShop";
-// import Drawer from "./Component/Drawer";
+import ShopList from "./Component/ShopList";
+import TestWidgets from "./Component/TestWidgets";
+
 
 function App() {
   return (
@@ -26,11 +28,14 @@ function App() {
               <Route path="/login" exact>
                   <Login />
               </Route>
-              <Route path="/test" exact>
-                  {/*<Drawer />*/}
-              </Route>
               <Route path="/shops/add">
                   <AddNewShop />
+              </Route>
+              <Route path="/shops/list">
+                  <ShopList />
+              </Route>
+              <Route path="/test">
+                  <TestWidgets />
               </Route>
           </Switch>
       </Router>
