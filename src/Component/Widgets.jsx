@@ -161,7 +161,9 @@ const ArrayTags = (props) => {
             <label htmlFor={props.id} style={{color:"#00635a"}}>{props.show}</label>
             <div className={"container"} id={"tagGroup"}>
                 <div className={"row"}>
-                    {(props.arrayValues || []).map(item => (
+
+                    {
+                        (props.arrayValues || ["empty"]).map(item => (
                         <button
                             key={props.id + "-" + item}
                             className="btn btn-outline-success col-6-sm"

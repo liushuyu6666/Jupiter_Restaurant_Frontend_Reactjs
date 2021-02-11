@@ -88,7 +88,7 @@ class AddNewShop extends Component{
         // check category
         if (this.state.formValue.category.trim() === "") {
             category.addStatus = false;
-        } else if (this.state.formValue.category.length > 20) {
+        } else if (this.state.formValue.category.length > 15) {
             category.classname = "is-invalid";
             category.promptClassname = "invalid-feedback";
             category.promptText = "should shorter";
@@ -201,69 +201,61 @@ class AddNewShop extends Component{
                 "body": formData,
                 "redirect": "follow",
             })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.result === null){
-                        this.setState({
-                            errorsFromServer: {value: data.msg, color: "red"},
-                            buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false}
-                        })
+            .then(res => res.json())
+            .then(data => {
+                if(data.result == null){
+                    this.setState({
+                        errorsFromServer: {value: data.msg, color: "red"},
+                        buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false}
+                    })
+                }
+                // if upload image properly, upload the entire form
+                else{
+                    // add the login user's name anyway
+                    const ownersListFinal = Array.from(new Set(
+                        [...this.state.ownersList,
+                        this.state.firstAuthorization.loginName]));
+                    const form = {
+                        "name": this.state.formValue.name,
+                        "desc": this.state.formValue.desc,
+                        "imgUrl": data.result,
+                        "categories": this.state.categoriesList,
+                        "owners" :ownersListFinal,
+                        "address": {"country": this.state.formValue.country,
+                            "city": this.state.formValue.city,
+                            "street": this.state.formValue.street},
                     }
-                    // if upload image properly, upload the entire form
-                    else{
-                        const ownersListFinal = Array.from(new Set(
-                            [...this.state.ownersList,
-                            this.state.firstAuthorization.loginName]))
-                        const form = {
-                            "name": this.state.formValue.name,
-                            "desc": this.state.formValue.desc,
-                            "imgUrl": data.result,
-                            "categories": this.state.categoriesList,
-                            "owners" :ownersListFinal,
-                            "address": {"country": this.state.formValue.country,
-                                "city": this.state.formValue.city,
-                                "street": this.state.formValue.street},
-                        }
-                        fetch("/v1/shops",{
-                            "method": "POST",
-                            "headers": {
-                                "Content-Type": "application/json",
-                                "token": localStorage.getItem("token"),
-                            },
-                            "body": JSON.stringify({
-                                "name": this.state.formValue.name,
-                                "desc": this.state.formValue.desc,
-                                "imgUrl": data.result,
-                                "categories": this.state.categoriesList,
-                                "owners" :ownersListFinal,
-                                "address": {"country": this.state.formValue.country,
-                                    "city": this.state.formValue.city,
-                                    "street": this.state.formValue.street},
-                                })
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if(data.result === null){
-                                this.setState({
-                                    errorsFromServer: {value: data.msg, color: "red"},
-                                    buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false}
-                                })
-                            }
-                            else{
-                                this.setState({
-                                    errorsFromServer: {value: data.msg, color: "green"},
-                                    buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false}
-                                })
-                            }
-                        })
-                        .catch(e => {
+                    fetch("/v1/shops",{
+                        "method": "POST",
+                        "headers": {
+                            "Content-Type": "application/json",
+                            "token": localStorage.getItem("token"),
+                        },
+                        "body": JSON.stringify(form),
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.result === null){
                             this.setState({
-                                errorsFromServer: {value: e.msg, color: "red"},
+                                errorsFromServer: {value: data.msg, color: "red"},
                                 buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false}
                             })
+                        }
+                        else{
+                            this.setState({
+                                errorsFromServer: {value: data.msg, color: "green"},
+                                buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false}
+                            })
+                        }
+                    })
+                    .catch(e => {
+                        this.setState({
+                            errorsFromServer: {value: e.msg, color: "red"},
+                            buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false}
                         })
-                    }
-                })
+                    })
+                }
+            })
         })
     }
 
@@ -386,27 +378,27 @@ class AddNewShop extends Component{
                 "token": localStorage.getItem("token")
             },
         })
-            .then(res => res.json())
-            .then(data => {
-                if(data.result == null){
-                    this.setState({
-                        firstAuthorization: {isValid: false, errorMsg: data.msg}
-                    })
-                }
-                else if(data.result.role !== "owner"){
-                    this.setState({
-                        firstAuthorization: {isValid: false, errorMsg: "only owner can access"}
-                    })
-                }
-                else{
-                    // console.log(data.result);
-                    this.setState({
-                        firstAuthorization: {isValid: true,
-                            errorMsg: "",
-                            loginName: data.result.username}
-                    })
-                }
-            })
+        .then(res => res.json())
+        .then(data => {
+            if(data.result == null){
+                this.setState({
+                    firstAuthorization: {isValid: false, errorMsg: data.msg}
+                })
+            }
+            else if(data.result.role !== "owner"){
+                this.setState({
+                    firstAuthorization: {isValid: false, errorMsg: "only owner can access"}
+                })
+            }
+            else{
+                // console.log(data.result);
+                this.setState({
+                    firstAuthorization: {isValid: true,
+                        errorMsg: "",
+                        loginName: data.result.username}
+                })
+            }
+        })
     }
 }
 

@@ -13,6 +13,7 @@ import FlexTest from "./Component/FlexTest";
 import AddNewShop from "./Component/AddNewShop";
 import ShopList from "./Component/ShopList";
 import TestWidgets from "./Component/TestWidgets";
+import DishList from "./Component/DishList";
 
 
 function App() {
@@ -33,6 +34,9 @@ function App() {
               </Route>
               <Route path="/shops/list">
                   <ShopList />
+              </Route>
+              <Route path="/dishes/list">
+                  <DishList />
               </Route>
               <Route path="/test">
                   <TestWidgets />

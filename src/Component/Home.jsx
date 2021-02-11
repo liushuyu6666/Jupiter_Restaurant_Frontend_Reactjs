@@ -8,7 +8,8 @@ class Home extends Component{
         super(prop);
         this.state = {
             loginStatus: false,
-            info: {}
+            info: {},
+            shopsList: [],
         }
     }
 
@@ -16,46 +17,18 @@ class Home extends Component{
     mainContent = () => {
         return(
             <div className="homepage-container">
-                <ShopCard src={"https://www.w3schools.com/css/paris.jpg"}
-                          alt={"shop picture"}
-                          shopName={"McDonald"}
-                          categoriesList={["cold food", "take away", "fast food", "dine in", "keep abcdefg"]}/>
-                <ShopCard src={"https://www.w3schools.com/css/paris.jpg"}
-                          alt={"shop picture"}
-                          shopName={"McDonald"}
-                          categoriesList={["cold food", "take away", "fast food", "dine in", "keep abcdefg"]}/>
-                <ShopCard src={"https://www.w3schools.com/css/paris.jpg"}
-                          alt={"shop picture"}
-                          shopName={"McDonald"}
-                          categoriesList={["cold food", "take away", "fast food", "dine in", "keep abcdefg"]}/>
-                <ShopCard src={"https://www.w3schools.com/css/paris.jpg"}
-                          alt={"shop picture"}
-                          shopName={"McDonald"}
-                          categoriesList={["cold food", "take away", "fast food", "dine in", "keep abcdefg"]}/>
-                <ShopCard src={"https://www.w3schools.com/css/paris.jpg"}
-                          alt={"shop picture"}
-                          shopName={"McDonald"}
-                          categoriesList={["cold food", "take away", "fast food", "dine in", "keep abcdefg"]}/>
-                <ShopCard src={"https://www.w3schools.com/css/paris.jpg"}
-                          alt={"shop picture"}
-                          shopName={"McDonald"}
-                          categoriesList={["cold food", "take away", "fast food", "dine in", "keep abcdefg"]}/>
-                <ShopCard src={"https://www.w3schools.com/css/paris.jpg"}
-                          alt={"shop picture"}
-                          shopName={"McDonald"}
-                          categoriesList={["cold jjjjjjjjj food", "take away", "fast food", "dine in", "keep abcdefg"]}/>
-                <ShopCard src={"https://www.w3schools.com/css/paris.jpg"}
-                          alt={"shop picture"}
-                          shopName={"McDonald"}
-                          categoriesList={["cold food", "take away", "fast food", "dine in", "keep abcdefg"]}/>
-                <ShopCard src={"https://www.w3schools.com/css/paris.jpg"}
-                          alt={"shop picture"}
-                          shopName={"McDonald"}
-                          categoriesList={["cold food", "take away", "fast food", "dine in", "keep abcdefg"]}/>
-                <ShopCard src={"https://www.w3schools.com/css/paris.jpg"}
-                          alt={"shop picture"}
-                          shopName={"McDonald"}
-                          categoriesList={["cold food", "take away", "fast food", "dine in", "keep abcdefg"]}/>
+                {
+                    (this.state.shopsList || []).map((shop, i) => (
+                        <ShopCard
+                            key={i + 1}
+                            src={shop.imgUrl}
+                            alt={shop.name + "picture"}
+                            shopName={shop.name}
+                            categoriesList={shop.categories}/>
+
+                        )
+                    )
+                }
             </div>
         )
     }
@@ -92,24 +65,6 @@ class Home extends Component{
         )
     }
 
-    // toggle = () => {
-    //     this.setState({
-    //         drawers: {
-    //             outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay bmd-drawer-in",
-    //             button: "", var1: "", var2: "", var3: "bmd-layout-backdrop in"
-    //         }
-    //     })
-    // }
-
-    // side page swipe back
-    // back = () => {
-    //     this.setState({
-    //         drawers: {
-    //             outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay",
-    //             button: "false", var3: "bmd-layout-backdrop"
-    //         }
-    //     })
-    // }
 
     // after logout, change the loginStatus and delete token
     logoutStatus = () => {
@@ -121,6 +76,7 @@ class Home extends Component{
     }
 
     componentDidMount() {
+
         // verify token, and show user info in the drawer, if not valid, the token will be clear
         let token = localStorage.getItem("token");
         if(!token){
@@ -137,23 +93,39 @@ class Home extends Component{
                     "token": token,
                 },
             })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.result != null){
-                        this.setState({
-                            info: data.result,
-                            loginStatus: true,
-                        })
-                    }
-                    else{
-                        localStorage.removeItem("token");
-                        this.setState({
-                            info: {},
-                            loginStatus: false,
-                        })
-                    }
-                })
+            .then(res => res.json())
+            .then(data => {
+                if(data.result != null){
+                    this.setState({
+                        info: data.result,
+                        loginStatus: true,
+                    })
+                }
+                else{
+                    localStorage.removeItem("token");
+                    this.setState({
+                        info: {},
+                        loginStatus: false,
+                    })
+                }
+            })
         }
+
+        // list all shops
+        // get shop information
+        fetch("/v1/shops", {
+            "method": "GET",
+            "headers": {
+                "Content-Type": "application/json",
+                "token": "",
+            },
+        })
+        .then(res => res.json())
+        .then(data => {
+            this.setState({
+                shopsList: data.result,
+            });
+        })
     }
 
     render(){

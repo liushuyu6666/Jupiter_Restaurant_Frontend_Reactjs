@@ -5,40 +5,40 @@ import ShopManageCollapse from "./ShopManageCollapse";
 import ShopCard, {HeaderWithDrawer, LoginAndRegisterInDrawer, NoPermissionPage, ProfileTableInDrawer} from "./Widgets";
 
 
-class ShopList extends Component{
+class DishList extends Component{
 
     constructor(props) {
         super(props);
         this.state = {
             firstAuthorization: {errorMsg: "", isValid: true},
             userInfo: {},
-            shopsList: [],
+            dishesList: [],
         }
     }
 
     // layout
     mainContent = () => {
         return(
-            <Accordion className={"shopListPage-container"}>
-                <div className={"shopListPage-collapse"}>
-                    {
-                        (this.state.shopsList || []).map((item, i) => (
-                            <ShopManageCollapse
-                                key={i + 1}
-                                shop={
-                                    {
-                                        _id: item._id,
-                                        name: item.name,
-                                        desc: item.desc,
-                                        imgUrl: item.imgUrl,
-                                        categories: item.categories,
-                                        owners: item.owners,
-                                        address: item.address,
-                                    }
-                                }
-                                eventKey={i+1}
-                            />
-                        ))
+            <Accordion className={"dishListPage-container"}>
+                <div className={"dishListPage-collapse"}>
+                    { <label>this is main content</label>
+                        // (this.state.shopsList || []).map((item, i) => (
+                        //     <DishManageCollapse
+                        //         uniqueKey={i+1}
+                        //         shop={
+                        //             {
+                        //                 _id: item._id,
+                        //                 name: item.name,
+                        //                 desc: item.desc,
+                        //                 imgUrl: item.imgUrl,
+                        //                 categories: item.categories,
+                        //                 owners: item.owners,
+                        //                 address: item.address,
+                        //             }
+                        //         }
+                        //         eventKey={i+1}
+                        //     />
+                        // ))
                     }
                 </div>
             </Accordion>
@@ -49,8 +49,8 @@ class ShopList extends Component{
     buttonSeries = () => {
         return(
             <button className={"btn btn-primary btn-sm active"}
-                onClick={() => {this.props.history.push("/")}}>
-                back to home
+                    onClick={() => {this.props.history.push("/shops/list")}}>
+                back to shop
             </button>
         )
     }
@@ -74,17 +74,18 @@ class ShopList extends Component{
 
     render() {
         return(
-            !this.state.firstAuthorization.isValid?
+            // !this.state.firstAuthorization.isValid?
+            true?
                 (<NoPermissionPage message={this.state.firstAuthorization.errorMsg}/>):
-            (
-                <HeaderWithDrawer
-                    pageContent={this.mainContent()}
-                    buttonSeries={this.buttonSeries()}
-                    drawerTitle={"owner info"}
-                    drawerContent={this.drawerContent()}
-                />
+                (
+                    <HeaderWithDrawer
+                        pageContent={this.mainContent()}
+                        buttonSeries={this.buttonSeries()}
+                        drawerTitle={"owner info"}
+                        // drawerContent={this.drawerContent()}
+                    />
 
-            )
+                )
         )
     }
 
@@ -169,4 +170,4 @@ class ShopList extends Component{
     }
 }
 
-export default withRouter(ShopList);
+export default withRouter(DishList);
