@@ -310,7 +310,7 @@ class ShopManageCollapse extends Component{
                 }
                 // update successfully
                 else{
-                    window.alert(data.msg);
+                    window.alert("update successfully");
                     this.setState({
                         errorsFromServer: {value: "jump back...", color: "green"},
                         buttonEnable: {...this.state.buttonEnable, saveButtonEnable: false},
