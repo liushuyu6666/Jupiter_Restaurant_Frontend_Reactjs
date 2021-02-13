@@ -13,7 +13,11 @@ code {
     monospace;
 }
 
-
+/* card-header */
+.card > .card-header {
+  padding: 0;
+  border: 0;
+}
 
 /* container */
 
