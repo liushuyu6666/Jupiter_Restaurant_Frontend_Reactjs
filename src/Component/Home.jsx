@@ -1,6 +1,12 @@
 import React, {Component} from 'react';
 import {withRouter} from "react-router-dom";
-import ShopCard, {ProfileTableInDrawer, LoginAndRegisterInDrawer, HeaderWithDrawer} from "./Widgets";
+import ShopCard, {
+    ProfileTableInDrawer,
+    LoginAndRegisterInDrawer,
+    HeaderWithDrawer,
+    CheckTokenInFirstLoad} from "./Widgets";
+import checkTokenAndFillProfile from '../Redux/token/tokenSlice'
+import {useSelector} from "react-redux";
 
 class Home extends Component{
 
@@ -55,6 +61,7 @@ class Home extends Component{
 
     //layout
     drawerContent = () => {
+
         return(
             (!this.state.loginStatus)?
             <LoginAndRegisterInDrawer
@@ -78,38 +85,40 @@ class Home extends Component{
     componentDidMount() {
 
         // verify token, and show user info in the drawer, if not valid, the token will be clear
-        let token = localStorage.getItem("token");
-        if(!token){
-            this.setState({
-                info: {},
-                loginStatus: false,
-            })
-        }
-        else {
-            fetch("/v1/profile", {
-                "method": "GET",
-                "headers": {
-                    "Content-Type": "application/json",
-                    "token": token,
-                },
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.result != null){
-                    this.setState({
-                        info: data.result,
-                        loginStatus: true,
-                    })
-                }
-                else{
-                    localStorage.removeItem("token");
-                    this.setState({
-                        info: {},
-                        loginStatus: false,
-                    })
-                }
-            })
-        }
+        // let token = localStorage.getItem("token");
+        // if(!token){
+        //     this.setState({
+        //         info: {},
+        //         loginStatus: false,
+        //     })
+        // }
+        // else {
+        //     fetch("/v1/profile", {
+        //         "method": "GET",
+        //         "headers": {
+        //             "Content-Type": "application/json",
+        //             "token": token,
+        //         },
+        //     })
+        //     .then(res => res.json())
+        //     .then(data => {
+        //         if(data.result != null){
+        //             this.setState({
+        //                 info: data.result,
+        //                 loginStatus: true,
+        //             })
+        //         }
+        //         else{
+        //             localStorage.removeItem("token");
+        //             this.setState({
+        //                 info: {},
+        //                 loginStatus: false,
+        //             })
+        //         }
+        //     })
+        // }
+
+        checkTokenAndFillProfile();
 
         // list all shops
         // get shop information
@@ -134,7 +143,8 @@ class Home extends Component{
                 pageContent={this.mainContent()}
                 buttonSeries={this.buttonSeries()}
                 drawerTitle={"Profile"}
-                drawerContent={this.drawerContent()}
+                // drawerContent={this.drawerContent()}
+                drawerContent ={CheckTokenInFirstLoad()}
             />
         )
     }

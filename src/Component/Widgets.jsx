@@ -1,5 +1,6 @@
 import React, {Component, useState} from 'react';
 import {withRouter} from "react-router-dom";
+import {useSelector} from "react-redux";
 
 const ShopCard = (props) => {
 
@@ -373,6 +374,20 @@ const HeaderWithDrawer = (props) => {
     )
 }
 
+const CheckTokenInFirstLoad = (props) => {
+
+    // redux state
+    const tokenInfo = useSelector(state => state.token);
+    return(
+        (!tokenInfo.isCertified)?
+            <LoginAndRegisterInDrawer
+                link={props}/>:
+            <ProfileTableInDrawer
+                user={tokenInfo.username}
+                changeLogoutStatus={() =>{}}/>
+    )
+}
+
 
 export default ShopCard;
 export {ProfileTableInDrawer,
@@ -384,4 +399,5 @@ export {ProfileTableInDrawer,
     NoPermissionPage,
     ErrorFromServer,
     VerifyTokenAndGetProfile,
-    HeaderWithDrawer};
+    HeaderWithDrawer,
+    CheckTokenInFirstLoad};
