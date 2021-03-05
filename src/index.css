@@ -19,7 +19,23 @@ code {
   border: 0;
 }
 
-/* container */
+/* grid */
+.login-register-container {
+  display: grid;
+  grid-template-columns: 2fr 6fr 2fr;
+  grid-template-rows: 15px auto;
+  grid-template-areas:
+    "header header header"
+    "leftMargin content rightMargin"
+}
+.login-register-content {
+  grid-area: content;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  place-self: stretch;
+  min-height: 270px;
+}
 
 .homepage-container {
   display: grid;

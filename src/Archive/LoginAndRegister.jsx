@@ -7,17 +7,17 @@
 //         super(props);
 //     }
 //
-//     login = (event) => {
+//     user = (event) => {
 //         event.preventDefault();
 //
-//         this.props.history.push("/login");
+//         this.props.history.push("/user");
 //
 //     }
 //
 //     render(){
 //         return(
 //             <>
-//                 <button onClick={this.login}>login</button>
+//                 <button onClick={this.user}>user</button>
 //                 <br/>
 //                 <p>don't have account?register here</p>
 //             </>

@@ -20,27 +20,27 @@ function App() {
   return (
       <Router>
           <Switch>
-              <Route path="/" exact>
-                  <Home />
-              </Route>
+              {/*<Route path="/" exact>*/}
+              {/*    <Home />*/}
+              {/*</Route>*/}
               <Route path="/register" exact>
                   <Register />
               </Route>
               <Route path="/login" exact>
                   <Login />
               </Route>
-              <Route path="/shops/add">
-                  <AddNewShop />
-              </Route>
-              <Route path="/shops/list">
-                  <ShopList />
-              </Route>
-              <Route path="/dishes/list">
-                  <DishList />
-              </Route>
-              <Route path="/test">
-                  <TestWidgets />
-              </Route>
+              {/*<Route path="/shops/add">*/}
+              {/*    <AddNewShop />*/}
+              {/*</Route>*/}
+              {/*<Route path="/shops/list">*/}
+              {/*    <ShopList />*/}
+              {/*</Route>*/}
+              {/*<Route path="/dishes/list">*/}
+              {/*    <DishList />*/}
+              {/*</Route>*/}
+              {/*<Route path="/test">*/}
+              {/*    <TestWidgets />*/}
+              {/*</Route>*/}
           </Switch>
       </Router>
     // <div className="App">

@@ -1,6 +1,6 @@
-import React, {Component, useState} from 'react';
+import React, {Component, useDebugValue, useState} from 'react';
 import {withRouter} from "react-router-dom";
-import {useSelector} from "react-redux";
+import {useDispatch} from "react-redux";
 
 const ShopCard = (props) => {
 
@@ -52,88 +52,22 @@ const ShopCard = (props) => {
     )
 }
 
-const ProfileTableInDrawer = (props) => {
-
-    const logout = () => {
-        localStorage.removeItem("token");
-        props.changeLogoutStatus();
-    }
-
-    const doNothingLikeMe = () => {
-
-    }
-
-    return(
-        <>
-            {
-                (props.user)?
-                (
-                    <div className={"d-flex justify-content-center"}>
-                        <div className={"d-flex flex-column"}>
-                            <FormGroup
-                                id={"username"}
-                                inputValue={props.user.username || ""}
-                                show={"username"}
-                                type={"text"}
-                                change={doNothingLikeMe}/>
-                            <FormGroup
-                                id={"email"}
-                                inputValue={props.user.email || ""}
-                                show={"email"}
-                                type={"text"}
-                                change={doNothingLikeMe}/>
-                            <FormGroup
-                                id={"role"}
-                                inputValue={props.user.role || ""}
-                                show={"role"}
-                                type={"text"}
-                                change={doNothingLikeMe}/>
-                            <button className={"btn btn-primary btn-sm active"}
-                                    onClick={logout}>
-                                logout
-                            </button>
-                        </div>
-                    </div>
-                ):
-                (<label>there is no information so far!</label>)
-            }
-        </>
-    )
-}
-
-const LoginAndRegisterInDrawer = withRouter((props) => {
-
-    const login = (event) => {
-        event.preventDefault();
-        props.history.push("/login");
-    }
-
-    const register = (event) => {
-        event.preventDefault();
-        props.history.push("/register");
-    }
-
-    return(
-        <div className={"d-flex justify-content-center"}>
-            <div className={"d-flex flex-column"}>
-                <button className={"btn btn-primary btn-sm active"}
-                        onClick={login}>
-                    login
-                </button>
-                {/*<button onClick={login}>login</button>*/}
-                <br/>
-                <p>don't have account?
-                    <span
-                        onClick={register}
-                        style={{cursor: "pointer"}}>
-                        register here
-                    </span></p>
-            </div>
-        </div>
-    )
-})
-
 const FormGroup = (props) => {
+
+    let className = "", promptClassname = "", type = props.type;
+
+    if(props.isValid === false){
+        className = "is-invalid";
+        promptClassname = "invalid-feedback";
+    }
+    else if(props.isValid === true){
+        className = "is-valid";
+        promptClassname = "valid-feedback";
+    }
+
+    if(props.id === "password" || props.id === "confirm"){
+        type = "password";
+    }
 
     return(
         <div className={"form-group"}>
@@ -143,15 +77,50 @@ const FormGroup = (props) => {
             </label>
             <input
                 value={props.inputValue}
-                className={`form-control ${props.className}`}
-                type={props.type}
+                className={`form-control ${className}`}
+                type={type}
                 id={props.id}
                 name={props.id} // to pair label
                 onChange={props.change}
             />
-            <div className={props.promptClassname}>
-                {props.promptText}
+            <div className={promptClassname}>
+                {props.errorMessage}
             </div>
+        </div>
+    )
+}
+
+const AlertText = (props) => {
+    let colorName = (props.isValid) ? "green" : "red";
+    return (
+        <div>
+            <p style={{color:colorName}}>{props.message}</p>
+        </div>
+    )
+}
+
+const CheckBox = (props) => {
+
+    return (
+        <div>
+            <label htmlFor={props.id}
+                   style={{color:"#00635a"}}>
+                {props.show}
+            </label>
+            {
+                (props.selectValues || []).map(item => (
+                    <label
+                        key={item}
+                        className="inline btn" style={{color: "#00635a"}}
+                    >
+                        <input
+                            type="checkbox"
+                            value={item}
+                            onChange={props.change}/>
+                        {" "+item}
+                    </label>
+                ))
+            }
         </div>
     )
 }
@@ -272,6 +241,19 @@ const NoPermissionPage = (props) => {
     )
 }
 
+const LoadingDataPage = (props) => {
+    return(
+        <div className={"d-flex justify-content-around"}>
+            <div className={"d-flex flex-column align-items-center"}>
+                <i className={"fa fa-refresh"}></i>
+                <div className="alert alert-warning" role="alert">
+                    {props.message}
+                </div>
+            </div>
+        </div>
+    )
+}
+
 const ErrorFromServer = (props) => {
     return(
         <p className={"text-center"} style={{color:props.color}}>
@@ -280,124 +262,240 @@ const ErrorFromServer = (props) => {
     )
 }
 
+// const CheckTokenInFirstLoad = () => {
+//     let token = localStorage.getItem("token");
+//     const dispatch = useDispatch();
+//
+//     if(!token) dispatch(noToken());
+//     else {
+//         fetch("/v1/profile", {
+//             "method": "GET",
+//             "headers": {
+//                 "Content-Type": "application/json",
+//                 "token": token,
+//             },
+//         })
+//             .then(res => res.json())
+//             .then(data => {
+//                 if(data.result != null){
+//                     store.dispatch(loginSuccessful(data.result))
+//                 }
+//                 else{
+//                     localStorage.removeItem("token");
+//                     store.dispatch(loginFail(data.msg))
+//                 }
+//             })
+//             .catch(error => store.dispatch(serverDown(error.toString())))
+//     }
+//
+//     return(
+//         <></>
+//     )
+// }
 
-const VerifyTokenAndGetProfile = (props) => {
-    let token = localStorage.getItem("token");
-    // need to check user's role first
-    fetch("/v1/profile",{
-        "method": "GET",
-        "headers": {
-            "Content-Type": "application/json",
-            "token": token,
-        },
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.result === null){
-            return null;
-        }
-        else if(data.result.role !== "owner"){
-            this.setState({
-                firstAuthentication: {isValid: false, errorMsg: "only owner can access"}
-            })
-        }
-        else{
-            this.setState({
-                firstAuthentication: {isValid: true, errorMsg: ""}
-            })
-        }
-    })
-}
 
-const HeaderWithDrawer = (props) => {
+// const HeaderWithDrawer = (props) => {
+//
+//     const [drawers, setDrawers] = useState({
+//         outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay",
+//         button: "false", var1: "false", var2: "true",
+//         var3: "bmd-layout-backdrop"
+//     })
+//
+//     const toggle = () => {
+//         setDrawers({
+//             outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay bmd-drawer-in",
+//             button: "", var1: "", var2: "", var3: "bmd-layout-backdrop in"
+//         })
+//     }
+//
+//     // side page swipe back
+//     const back = () => {
+//         setDrawers({
+//                 outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay",
+//                 button: "false", var3: "bmd-layout-backdrop"
+//             }
+//         )
+//     }
+//
+//     return (
+//         <div className="d-flex p-2">
+//             <div className={drawers.outer}>
+//                 <header className="bmd-layout-header">
+//                     <nav className="navbar navbar-light"
+//                          style={{backgroundColor: "#FFFFFF",
+//                              padding: "2px 25px 4px 0"}}>
+//                         <button
+//                             className="navbar-toggler"
+//                             type="button"
+//                             style={{border: "0"}}
+//                             onClick={toggle}>
+//                             <i className="fa fa-bars"></i>
+//                         </button>
+//                         <div className="nav navbar-nav">
+//                             <div className="d-flex">
+//                                 {props.buttonSeries}
+//                             </div>
+//                         </div>
+//                     </nav>
+//                 </header>
+//                 <div id="dw-s2" className="bmd-layout-drawer bg-faded">
+//                     <header>
+//                         <div className="navbar-brand">{props.drawerTitle}</div>
+//                     </header>
+//                     <div>
+//                         {props.drawerContent}
+//                     </div>
+//                 </div>
+//                 <div style={{paddingBottom: "10px"}}></div>
+//                 <div style={{backgroundColor: "white", minHeight: "700px"}}>
+//                     {props.pageContent}
+//                 </div>
+//                 <div style={{paddingBottom: "10px"}}></div>
+//                 <div className={drawers.var3}
+//                      onClick={back} />
+//             </div>
+//         </div>
+//     )
+// }
 
-    const [drawers, setDrawers] = useState({
-        outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay",
-        button: "false", var1: "false", var2: "true",
-        var3: "bmd-layout-backdrop"
-    })
 
-    const toggle = () => {
-        setDrawers({
-            outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay bmd-drawer-in",
-            button: "", var1: "", var2: "", var3: "bmd-layout-backdrop in"
-        })
-    }
+/************ Archive  *******************************/
+// const DrawerContent = () => {
+//
+//     // redux state
+//     // const tokenInfo = useSelector(selectTokenInfo);
+//     const tokenInfo = store.getState().token;
+//     // const tokenInfo = state => state.token;
+//     return(
+//         (tokenInfo.verification.isEmptyToken)?
+//             <LoginAndRegisterInDrawer/>:
+//             <ProfileTableInDrawer
+//                 user={tokenInfo.userInfo}
+//                 changeLogoutStatus={() =>{}}/>
+//     )
+// }
 
-    // side page swipe back
-    const back = () => {
-        setDrawers({
-                outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay",
-                button: "false", var3: "bmd-layout-backdrop"
-            }
-        )
-    }
+// const ProfileTableInDrawer = (props) => {
+//
+//     const logout = () => {
+//         localStorage.removeItem("token");
+//         props.changeLogoutStatus();
+//     }
+//
+//     const doNothingLikeMe = () => {
+//
+//     }
+//
+//     return(
+//         <>
+//             {
+//                 (props.user)?
+//                     (
+//                         <div className={"d-flex justify-content-center"}>
+//                             <div className={"d-flex flex-column"}>
+//                                 <FormGroup
+//                                     id={"username"}
+//                                     inputValue={props.user.username || ""}
+//                                     show={"username"}
+//                                     type={"text"}
+//                                     change={doNothingLikeMe}/>
+//                                 <FormGroup
+//                                     id={"email"}
+//                                     inputValue={props.user.email || ""}
+//                                     show={"email"}
+//                                     type={"text"}
+//                                     change={doNothingLikeMe}/>
+//                                 <FormGroup
+//                                     id={"role"}
+//                                     inputValue={props.user.role || ""}
+//                                     show={"role"}
+//                                     type={"text"}
+//                                     change={doNothingLikeMe}/>
+//                                 <button className={"btn btn-primary btn-sm active"}
+//                                         onClick={logout}>
+//                                     logout
+//                                 </button>
+//                             </div>
+//                         </div>
+//                     ):
+//                     (<label>there is no information so far!</label>)
+//             }
+//         </>
+//     )
+// }
+//
+// const LoginAndRegisterInDrawer = withRouter((props) => {
+//
+//     const user = (event) => {
+//         event.preventDefault();
+//         props.history.push("/user");
+//     }
+//
+//     const register = (event) => {
+//         event.preventDefault();
+//         props.history.push("/register");
+//     }
+//
+//     return(
+//         <div className={"d-flex justify-content-center"}>
+//             <div className={"d-flex flex-column"}>
+//                 <button className={"btn btn-primary btn-sm active"}
+//                         onClick={user}>
+//                     user
+//                 </button>
+//                 {/*<button onClick={user}>user</button>*/}
+//                 <br/>
+//                 <p>don't have account?
+//                     <span
+//                         onClick={register}
+//                         style={{cursor: "pointer"}}>
+//                         register here
+//                     </span></p>
+//             </div>
+//         </div>
+//     )
+// })
 
-    return (
-        <div className="d-flex p-2">
-            <div className={drawers.outer}>
-                <header className="bmd-layout-header">
-                    <nav className="navbar navbar-light"
-                         style={{backgroundColor: "#FFFFFF",
-                             padding: "2px 25px 4px 0"}}>
-                        <button
-                            className="navbar-toggler"
-                            type="button"
-                            style={{border: "0"}}
-                            onClick={toggle}>
-                            <i className="fa fa-bars"></i>
-                        </button>
-                        <div className="nav navbar-nav">
-                            <div className="d-flex">
-                                {props.buttonSeries}
-                            </div>
-                        </div>
-                    </nav>
-                </header>
-                <div id="dw-s2" className="bmd-layout-drawer bg-faded">
-                    <header>
-                        <div className="navbar-brand">{props.drawerTitle}</div>
-                    </header>
-                    <div>
-                        {props.drawerContent}
-                    </div>
-                </div>
-                <div style={{paddingBottom: "10px"}}></div>
-                <div style={{backgroundColor: "white", minHeight: "700px"}}>
-                    {props.pageContent}
-                </div>
-                <div style={{paddingBottom: "10px"}}></div>
-                <div className={drawers.var3}
-                     onClick={back} />
-            </div>
-        </div>
-    )
-}
 
-const CheckTokenInFirstLoad = (props) => {
-
-    // redux state
-    const tokenInfo = useSelector(state => state.token);
-    return(
-        (!tokenInfo.isCertified)?
-            <LoginAndRegisterInDrawer
-                link={props}/>:
-            <ProfileTableInDrawer
-                user={tokenInfo.username}
-                changeLogoutStatus={() =>{}}/>
-    )
-}
+// const VerifyTokenAndGetProfile = (props) => {
+//     let token = localStorage.getItem("token");
+//     // need to check user's role first
+//     fetch("/v1/profile",{
+//         "method": "GET",
+//         "headers": {
+//             "Content-Type": "application/json",
+//             "token": token,
+//         },
+//     })
+//         .then(res => res.json())
+//         .then(data => {
+//             if(data.result === null){
+//                 return null;
+//             }
+//             else if(data.result.role !== "owner"){
+//                 this.setState({
+//                     firstAuthentication: {isValid: false, errorMsg: "only owner can access"}
+//                 })
+//             }
+//             else{
+//                 this.setState({
+//                     firstAuthentication: {isValid: true, errorMsg: ""}
+//                 })
+//             }
+//         })
+// }
 
 
 export default ShopCard;
-export {ProfileTableInDrawer,
-    LoginAndRegisterInDrawer,
+export {
+    // CheckTokenInFirstLoad,
     FormGroup,
-    ArrayTags,
-    ArrayInputTags,
+    CheckBox,
+    AlertText,
+    // ArrayTags,
+    // ArrayInputTags,
     Dropdown,
-    NoPermissionPage,
-    ErrorFromServer,
-    VerifyTokenAndGetProfile,
-    HeaderWithDrawer,
-    CheckTokenInFirstLoad};
+    // NoPermissionPage,
+    // LoadingDataPage,
+    ErrorFromServer,};
