@@ -14,27 +14,36 @@ import AddNewShop from "./Component/AddNewShop";
 import ShopList from "./Component/ShopList";
 import TestWidgets from "./Component/TestWidgets";
 import DishList from "./Component/DishList";
+import DishesInShop from "./Component/DishesInShop";
+import ShopsManage from "./Component/ShopsManage";
+import ShopEdit from "./Component/ShopEdit";
 
 
 function App() {
   return (
       <Router>
           <Switch>
-              {/*<Route path="/" exact>*/}
-              {/*    <Home />*/}
-              {/*</Route>*/}
+              <Route path="/" exact>
+                  <Home />
+              </Route>
               <Route path="/register" exact>
                   <Register />
               </Route>
               <Route path="/login" exact>
                   <Login />
               </Route>
+              <Route path="/shops/:shopId/dishes">
+                  <DishesInShop />
+              </Route>
               {/*<Route path="/shops/add">*/}
               {/*    <AddNewShop />*/}
               {/*</Route>*/}
-              {/*<Route path="/shops/list">*/}
-              {/*    <ShopList />*/}
-              {/*</Route>*/}
+              <Route path="/manage/shops">
+                  <ShopsManage />
+              </Route>
+              <Route path="/edit/shops/:shopId">
+                  <ShopEdit />
+              </Route>
               {/*<Route path="/dishes/list">*/}
               {/*    <DishList />*/}
               {/*</Route>*/}
@@ -43,22 +52,6 @@ function App() {
               {/*</Route>*/}
           </Switch>
       </Router>
-    // <div className="App">
-    //   <header className="App-header">
-    //     <img src={logo} className="App-logo" alt="logo" />
-    //     <p>
-    //       Edit <code>src/App.js</code> and save to reload.
-    //     </p>
-    //     <a
-    //       className="App-link"
-    //       href="https://reactjs.org"
-    //       target="_blank"
-    //       rel="noopener noreferrer"
-    //     >
-    //       Learn React
-    //     </a>
-    //   </header>
-    // </div>
   );
 }
 

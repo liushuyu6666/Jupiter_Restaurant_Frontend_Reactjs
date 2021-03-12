@@ -14,8 +14,16 @@ const login = (username, password) => {
     let loginRequest = {
         "username": username,
         "password": password,
-    }
-    return post("/v1/jupiter/login", null, loginRequest)
+    };
+    return post("/v1/jupiter/login", null, loginRequest);
 }
 
-export {register, login}
+const verify = (jwt) => {
+    return post("/v1/jupiter/verify", jwt, null);
+}
+
+export {
+    register,
+    login,
+    verify
+}

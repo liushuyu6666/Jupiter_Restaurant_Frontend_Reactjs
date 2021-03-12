@@ -3,6 +3,7 @@ import {withRouter} from "react-router-dom";
 import {AlertText, FormGroup} from "./Widgets";
 import {login} from "../Services/auth";
 import {setProfile} from "../Redux/user/actionCreator"
+import {resetServer} from "../Redux/server/actionCreator";
 import {connect} from "react-redux";
 
 
@@ -39,7 +40,7 @@ class Login extends Component{
         login(username,password)
             .then(res => {
                 if(res.result != null){
-                    localStorage.setItem("Authorization", "Bearer " + res.result.jwt);
+                    localStorage.setItem("Authorization", res.result.jwt);
                     this.setState({
                         errorsFromServer: {
                             isValid: true,
@@ -50,14 +51,19 @@ class Login extends Component{
                         "email": res.result.email,
                         "roles": res.result.roles,
                     });
-                    setTimeout(()=>
+                    setTimeout(()=> {
+                            this.props.resetServer();
                             this.setState({
                                 errorsFromServer: {
                                     isValid: true,
-                                    message: "jumping to home page..."}
-                            }),
+                                    message: "jumping to home page..."
+                                }
+                            })
+                        },
                         3000);
-                    setTimeout(()=>this.props.history.push("/"),
+                    setTimeout(()=> {
+                            this.props.history.push("/")
+                        },
                         5000);
                 }
                 else{
@@ -105,7 +111,7 @@ class Login extends Component{
                             <button type="button"
                                     className={"btn btn-primary btn-sm active"}
                                     disabled={!this.state.buttonEnabled}
-                                    onClick={this.submit}>register</button>
+                                    onClick={this.submit}>login</button>
                         </div>
                     </form>
                 </div>
@@ -160,12 +166,12 @@ class Login extends Component{
 
 const mapStateToProps = (state, ownProps) => {
     return{
-        currentUser: state.profile,
     }
 }
 
 const mapDispatchToProps = {
-    setProfile
+    setProfile,
+    resetServer,
 }
 
 export default connect(

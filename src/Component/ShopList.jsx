@@ -1,172 +1,252 @@
-import React, {Component} from "react/";
-import {withRouter} from "react-router-dom";
-import { Accordion, Card, Button } from "react-bootstrap";
-import ShopManageCollapse from "./ShopManageCollapse";
-import ShopCard, {HeaderWithDrawer, LoginAndRegisterInDrawer, NoPermissionPage, ProfileTableInDrawer} from "./Widgets";
-
-
-class ShopList extends Component{
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            firstAuthorization: {errorMsg: "", isValid: true},
-            userInfo: {},
-            shopsList: [],
-        }
-    }
-
-    // layout
-    mainContent = () => {
-        return(
-            <Accordion className={"shopListPage-container"}>
-                <div className={"shopListPage-collapse"}>
-                    {
-                        (this.state.shopsList || []).map((item, i) => (
-                            <ShopManageCollapse
-                                key={i + 1}
-                                shop={
-                                    {
-                                        _id: item._id,
-                                        name: item.name,
-                                        desc: item.desc,
-                                        imgUrl: item.imgUrl,
-                                        categories: item.categories,
-                                        owners: item.owners,
-                                        address: item.address,
-                                    }
-                                }
-                                eventKey={i+1}
-                            />
-                        ))
-                    }
-                </div>
-            </Accordion>
-        )
-    }
-
-    // layout
-    buttonSeries = () => {
-        return(
-            <button className={"btn btn-primary btn-sm active"}
-                onClick={() => {this.props.history.push("/")}}>
-                back to home
-            </button>
-        )
-    }
-
-    // layout
-    drawerContent = () => {
-        return(
-            <ProfileTableInDrawer
-                user={this.state.userInfo}
-                changeLogoutStatus={this.logoutStatus}/>
-        )
-    }
-
-    logoutStatus = () => {
-        localStorage.removeItem("token");
-        this.setState({
-            userInfo: {}
-        })
-        this.props.history.push("/")
-    }
-
-    render() {
-        return(
-            !this.state.firstAuthorization.isValid?
-                (<NoPermissionPage message={this.state.firstAuthorization.errorMsg}/>):
-            (
-                <HeaderWithDrawer
-                    pageContent={this.mainContent()}
-                    buttonSeries={this.buttonSeries()}
-                    drawerTitle={"owner info"}
-                    drawerContent={this.drawerContent()}
-                />
-
-            )
-        )
-    }
-
-    componentDidMount() {
-        // verify token and check role
-        const token = localStorage.getItem("token");
-        if(!token){
-            this.setState({
-                firstAuthorization: {errorMsg: "login first please", isValid: false},
-            })
-        }
-        else{
-            fetch("/v1/profile",{
-                "method": "GET",
-                "headers": {
-                    "Content-Type": "application/json",
-                    "token": token
-                },
-            })
-            .then(res => res.json())
-            .then(data => {
-                // no token
-                if(data.result == null){
-                    localStorage.removeItem("token");
-                    this.setState({
-                        firstAuthorization: {isValid: false, errorMsg: data.msg}
-                    })
-                }
-                // role is not owner
-                else if(data.result.role !== "owner"){
-                    this.setState({
-                        firstAuthorization: {isValid: false, errorMsg: "only owner can access"}
-                    })
-                }
-                // token is right, authorization pass and fetch shop data
-                else{
-                    this.setState({
-                        userInfo: data.result,
-                    });
-                    fetch("/v1/shops", {
-                        "method": "GET",
-                        "headers": {
-                            "Content-Type": "application/json",
-                            "token": token,
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if(data.result == null){
-                            this.setState({
-                                firstAuthorization: {
-                                    isValid: false,
-                                    errorMsg: data.msg,
-                                }
-                            })
-                        }
-                        else{
-                            let shop = [];
-                            data.result.forEach((item, i) => {
-                                shop.push(item);
-                            });
-                            this.setState({
-                                shopsList: shop,
-                                firstAuthorization: {
-                                    isValid: true,
-                                    errorMsg: "",
-                                },
-                            })
-                        }
-                    })
-                    .catch(err => {
-                        this.setState({
-                            firstAuthorization: {
-                                isValid: false,
-                                errorMsg: err.error,
-                            }
-                        })
-                    })
-                }
-            })
-        }
-    }
-}
-
-export default withRouter(ShopList);
+// import React, {Component} from "react/";
+// import {withRouter} from "react-router-dom";
+// import { Accordion} from "react-bootstrap";
+// import {connect} from "react-redux";
+//
+// import ShopManageCollapse from "./ShopManageCollapse";
+// import {
+//     // CheckTokenInFirstLoad,
+//     NoPermissionPage,
+//     LoadingDataPage,
+// } from "./Widgets";
+// import HeaderAndDrawer from "./HeaderAndDrawer";
+//
+//
+// class ShopList extends Component{
+//
+//     constructor(props) {
+//         super(props);
+//         this.state = {
+//             isLoading: true,
+//             errorsFromServer: {isValid: true, message: ""},
+//         }
+//     }
+//
+//     // layout
+//     mainContent = () => {
+//         // if(!this.state.initialStage){
+//         //     if(!this.props.token.verification.isTokenWorks) {
+//         //         return (
+//         //             <NoPermissionPage
+//         //                 message={"token is not valid"}
+//         //             />
+//         //         )
+//         //     }
+//         //     else if(!this.state.mainData.isValid) {
+//         //         return (
+//         //             <NoPermissionPage
+//         //                 message={`no data found: ${this.state.mainData.error}`}
+//         //             />
+//         //         )
+//         //     }
+//         //     else if(this.props.token.userInfo.role !== "owner") {
+//         //         return (
+//         //             <NoPermissionPage
+//         //                 message={`only owner can access`}
+//         //             />
+//         //         )
+//         //     }
+//         //     else {
+//         //         return(
+//         //             <Accordion className={"shopListPage-container"}>
+//         //                 <div className={"shopListPage-collapse"}>
+//         //                     {
+//         //                         (this.state.mainData.content || []).map((item, i) => (
+//         //                             <ShopManageCollapse
+//         //                                 key={i + 1}
+//         //                                 shop={
+//         //                                     {
+//         //                                         _id: item._id,
+//         //                                         name: item.name,
+//         //                                         desc: item.desc,
+//         //                                         imgUrl: item.imgUrl,
+//         //                                         categories: item.categories,
+//         //                                         owners: item.owners,
+//         //                                         address: item.address,
+//         //                                     }
+//         //                                 }
+//         //                                 eventKey={i+1}
+//         //                             />
+//         //                         ))
+//         //                     }
+//         //                 </div>
+//         //             </Accordion>
+//         //         )
+//         //     }
+//         // }
+//     }
+//
+//     // layout
+//     buttonSeries = () => {
+//         // if(!this.state.initialStage){
+//         //     return(
+//         //         <button className={"btn btn-primary btn-sm active"}
+//         //                 onClick={() => {this.props.history.push("/")}}>
+//         //             back to home
+//         //         </button>
+//         //     )
+//         // }
+//     }
+//
+//     render() {
+//         return (
+//             <div>
+//                 <HeaderAndDrawer
+//                     mainContent={this.mainContent()}
+//                     buttonSeries={this.buttonSeries()}/>
+//             </div>
+//         )
+//     }
+//
+//     // componentDidUpdate(prevProps, prevState, snapshot) {
+//     //     console.log(this.props.token);
+//     //     if(this.props.token.verification.isServerWorks){
+//     //         if(this.props.token.verification.isTokenWorks){
+//     //             if(this.props.token.userInfo.role === "owner"){
+//     //                 const token = localStorage.getItem("token");
+//     //                 fetch("/v1/shops", {
+//     //                     "method": "GET",
+//     //                     "headers": {
+//     //                         "Content-Type": "application/json",
+//     //                         "token": token,
+//     //                     }
+//     //                 })
+//     //                     .then(res => {
+//     //                         console.log(res);
+//     //                         return res.json()
+//     //                     })
+//     //                     .then(data => {
+//     //                         if(data.result != null){
+//     //                             this.setState({
+//     //                                 ...this.state,
+//     //                                 initialStage: false,
+//     //                                 mainData: {
+//     //                                     ...this.state.mainData,
+//     //                                     isResponse: true,
+//     //                                     isValid: true,
+//     //                                     error: "",
+//     //                                     content: data.result,
+//     //                                 }
+//     //                             });
+//     //                         }
+//     //                         else{
+//     //                             this.setState({
+//     //                                 ...this.state,
+//     //                                 initialStage: false,
+//     //                                 mainData: {
+//     //                                     ...this.state.mainData,
+//     //                                     isResponse: true,
+//     //                                     isValid: false,
+//     //                                     error: data.msg,
+//     //                                     content: null,
+//     //                                 }
+//     //                             });
+//     //                         }
+//     //                     })
+//     //                     .catch(err => {
+//     //                         this.setState({
+//     //                             ...this.state,
+//     //                             initialStage: false,
+//     //                             mainData: {
+//     //                                 ...this.state.mainData,
+//     //                                 isResponse: false,
+//     //                                 isValid: false,
+//     //                                 error: err.toString(),
+//     //                                 content: null,
+//     //                             }
+//     //                         });
+//     //                     })
+//     //             }
+//     //             // if role !== "owner", mainContent don't need shopList
+//     //         }
+//     //         // if isTokenWorks = false, mainContent don't need shopList
+//     //     }
+//     //     else{
+//     //         this.setState({
+//     //             ...this.state,
+//     //             initialStage: false,
+//     //         })
+//     //     }
+//     // }
+//
+//     componentDidMount() {
+//
+//         this.setState({
+//             isLoading: true,
+//         });
+//
+//
+//     //     if(this.props.token.verification.isServerWorks){
+//     //         if(this.props.token.verification.isTokenWorks){
+//     //             if(this.props.token.userInfo.role === "owner"){
+//     //                 const token = localStorage.getItem("token");
+//     //                 fetch("/v1/shops", {
+//     //                     "method": "GET",
+//     //                     "headers": {
+//     //                         "Content-Type": "application/json",
+//     //                         "token": token,
+//     //                     }
+//     //                 })
+//     //                 .then(res => res.json())
+//     //                 .then(data => {
+//     //                     if(data.result != null){
+//     //                         this.setState({
+//     //                             ...this.state,
+//     //                             initialStage: false,
+//     //                             mainData: {
+//     //                                 ...this.state.mainData,
+//     //                                 isResponse: true,
+//     //                                 isValid: true,
+//     //                                 error: "",
+//     //                                 content: data.result,
+//     //                             }
+//     //                         });
+//     //                     }
+//     //                     else{
+//     //                         this.setState({
+//     //                             ...this.state,
+//     //                             initialStage: false,
+//     //                             mainData: {
+//     //                                 ...this.state.mainData,
+//     //                                 isResponse: true,
+//     //                                 isValid: false,
+//     //                                 error: data.msg,
+//     //                                 content: null,
+//     //                             }
+//     //                         });
+//     //                     }
+//     //                 })
+//     //                 .catch(err => {
+//     //                     this.setState({
+//     //                         ...this.state,
+//     //                         initialStage: false,
+//     //                         mainData: {
+//     //                             ...this.state.mainData,
+//     //                             isResponse: false,
+//     //                             isValid: false,
+//     //                             error: err.toString(),
+//     //                             content: null,
+//     //                         }
+//     //                     });
+//     //                 })
+//     //             }
+//     //             // if role !== "owner", mainContent don't need shopList
+//     //         }
+//     //         // if isTokenWorks = false, mainContent don't need shopList
+//     //     }
+//     //     else{
+//     //         this.setState({
+//     //             ...this.state,
+//     //             initialStage: false,
+//     //         })
+//     //     }
+//     }
+// }
+//
+// function mapStateToProps(state){
+//     return {
+//         token: state.token,
+//     }
+// }
+//
+// export default connect(mapStateToProps)(withRouter(ShopList));

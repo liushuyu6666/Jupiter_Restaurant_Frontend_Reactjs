@@ -1,1 +1,2 @@
 export const SET_PROFILE = "SET_PROFILE";
+export const DELETE_PROFILE = "DELETE_PROFILE";

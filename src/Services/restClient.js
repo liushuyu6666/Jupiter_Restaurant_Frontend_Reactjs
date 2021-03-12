@@ -1,4 +1,4 @@
-const post = (url, jwt, body) => {
+const post = (url, jwt, body, isStringify=true) => {
     return fetch(
         url,
         {
@@ -6,9 +6,9 @@ const post = (url, jwt, body) => {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": jwt? "Bearer "
-                        + localStorage.getItem("token") : ""
+                        + jwt: "",
                 },
-                body: JSON.stringify(body),
+                body: (isStringify)?JSON.stringify(body):body,
             }
     ).then(response => {
         if(response.ok){
@@ -18,13 +18,13 @@ const post = (url, jwt, body) => {
     })
 }
 
-const get = (url, jwt=false) => {
+const get = (url, jwt=null) => {
     return fetch(url, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": jwt? "Bearer "
-                + localStorage.getItem(process.env.REACT_APP_TOKEN) : ""
+            "Authorization": jwt !== null? "Bearer "
+                + jwt : ""
         },
     }).then(response => {
         if(response.ok){

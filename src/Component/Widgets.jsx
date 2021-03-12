@@ -1,6 +1,7 @@
-import React, {Component, useDebugValue, useState} from 'react';
+import React, {Component, useDebugValue, useState, useRef} from 'react';
 import {withRouter} from "react-router-dom";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import {addItemInCart} from "../Redux/cart/actionCreator";
 
 const ShopCard = (props) => {
 
@@ -37,17 +38,128 @@ const ShopCard = (props) => {
                     {(props.categoriesList || []).map((item, i) => {
                         lengthOfTag += item.length;
                         if(i<3 && lengthOfTag <= 30){
-                            return (<div
-                                style={{backgroundColor:randomColor(),
-                                    padding: "0 2px",
-                                    color:"white", textAlign: "center"}}>
-                                {item}
-                            </div>)
+                            return (
+                                <div
+                                    key={i}
+                                    style={{backgroundColor:randomColor(),
+                                        padding: "0 2px",
+                                        color:"white", textAlign: "center"}}>
+                                    {item}
+                                </div>)
                         }
                         else return null;
                     })}
                 </div>
             </div>
+        </div>
+    )
+}
+
+const DishCard = (props) => {
+
+    const [hover, setHover] = useState(false);
+    const cart = useSelector(state => state.cart);
+    const dispatch = useDispatch();
+
+    let lengthOfTag = 0;
+
+    const randomColor = () => {
+        const beautifulColor =
+            ["#e52165",
+                "#0d1137",
+                "#077b8a",
+                "#a2d5c6",
+                "#ff6e40",
+                "#ecc19c",
+                "#87ac34",
+                "#123456",
+                "#b9925e",
+                "#4203c9"]
+        return beautifulColor[Math.floor(Math.random() * 10)];
+    }
+
+    const overMouse = (event) =>{
+        setHover(true);
+    }
+
+    const leaveMouse = (event) =>{
+        setHover(false);
+    }
+
+    const addCart = (event) => {
+
+        event.preventDefault();
+
+        const dishId = props.dishId;
+        const shopId = props.shopId;
+        const ownerId = props.ownerId;
+        const dishName = props.dishName;
+        const shopName = props.shopName;
+        dispatch(
+            addItemInCart(
+                {"dishId": dishId,
+                "shopId": shopId,
+                "ownerId": ownerId,
+                "dishName": dishName,
+                "shopName": shopName,}
+            )
+        );
+    }
+
+    return(
+        <div className="card"
+             style={{minHeight: "200px", width: "250px", backgroundColor: "white"}}>
+            <img src={props.src}
+                 className="card-img-top"
+                 alt={props.alt}
+                 style={{height: "120px", width: "250px"}}/>
+            {
+                (hover) ?
+                (
+                    <div className="card-body"
+                         style={{
+                             display: "grid",
+                             padding: "0 0 0 3px",
+                             backgroundColor: "#00635a",
+                             color: "white",
+                         }}
+                         onMouseLeave={leaveMouse}>
+                        <p style={{placeSelf: "center", fontSize: "15px"}}
+                           className={"btn btn-primary btn-sm active"}
+                            onClick={addCart}>add to cart</p>
+                    </div>
+                ) :
+                (
+                    <div className="card-body"
+                         style={{padding: "0 0 0 3px"}}
+                         onMouseOver={overMouse}>
+                        <p
+                            style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "19px"}}>
+                            {props.dishName}
+                        </p>
+                        <p
+                            style={{margin: "1px 0 1px 3px", fontFamily: "Michroma", fontSize: "14px"}}>
+                            {`$${props.price}`}
+                        </p>
+                        <div className={"homepage-tags-container"}
+                             style={{margin: "0 0 6px 3px", fontSize: "15px"}}>
+                            {(props.categoriesList || []).map((item, i) => {
+                                lengthOfTag += item.length;
+                                if (i < 3 && lengthOfTag <= 30) {
+                                    return (
+                                        <div
+                                            key={i}
+                                            style={{
+                                                backgroundColor: randomColor(),
+                                                padding: "0 2px",
+                                                color: "white", textAlign: "center"
+                                            }}>
+                                            {item}
+                                        </div>)
+                                } else return null;
+                            })}
+                        </div>
+                    </div>)}
         </div>
     )
 }
@@ -131,7 +243,6 @@ const ArrayTags = (props) => {
             <label htmlFor={props.id} style={{color:"#00635a"}}>{props.show}</label>
             <div className={"container"} id={"tagGroup"}>
                 <div className={"row"}>
-
                     {
                         (props.arrayValues || ["empty"]).map(item => (
                         <button
@@ -145,6 +256,26 @@ const ArrayTags = (props) => {
             </div>
         </div>
     )
+}
+
+const SmallArrayTags = (props) => {
+    return(
+            <div>
+                <label htmlFor={props.id} style={{color:"#00635a"}}>{props.show}</label>
+                <div  className={"homepage-tags-container"}
+                      style={{margin: "0 0 0 3px", fontSize:"15px"}}>
+                    {(props.arrayValues || ["no role"]).map((item, i) => (
+                        <div
+                            key={i}
+                            style={{backgroundColor:"#00635a",
+                                padding: "0 2px",
+                                color:"white", textAlign: "center"}}>
+                            {item}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )
 }
 
 const ArrayInputTags = (props) => {
@@ -165,16 +296,17 @@ const ArrayInputTags = (props) => {
                     id={props.arrayKey}
                     className={"btn btn-outline-primary btn-sm active"}
                     disabled={!props.buttonEnable}
+                    // disabled={true}
                     name={props.id} // should be the same as the key in the formValue of state
                     onClick={props.addFunc}>+</button>
             </div>
             <div className={"container"} id={"tagGroup"}>
                 <div className={"row"}>
-                    {(props.arrayValues || []).map(item => (
+                    {[...props.arrayValues].map(item => (
                         <button
                             key={props.id + "-" + item}
                             className="btn btn-outline-success col-6-sm"
-                            name={props.arrayKey} // should be the same as the key in the state
+                            name={props.arrayKey}
                             onClick={props.removeFunc}
                             value={item}>{item}</button>
                     ))}
@@ -184,6 +316,77 @@ const ArrayInputTags = (props) => {
     )
 }
 
+const CartDropdown = (props) => {
+
+    const cartRef = useRef();
+    const [isOpen, setIsOpen] = useState("");
+    const [top, setTop] = useState("");
+    const [left, setLeft] = useState("");
+    const winWidth = window.innerWidth;
+
+    const toggle = (event) => {
+        event.preventDefault();
+        const {offsetTop, offsetLeft, offsetHeight, offsetWidth} = cartRef.current;
+
+        setTop((offsetTop + offsetHeight).toString() + "px");
+        setLeft((winWidth - 400 - offsetLeft).toString() + "px");
+        if(isOpen === "") setIsOpen("show");
+        else setIsOpen("")
+    }
+
+    return(
+        <div ref={cartRef}
+             className={"dropdown"}>
+            <button id="dropdownMenuLink"
+                    className="btn btn-secondary btn-sm dropdown-toggle"
+                    onClick={toggle}>
+                {`cart item(${3})`}
+            </button>
+            <div
+                id={"cart"}
+                className={`dropdown-menu dropdown-menu-right ${isOpen}`}
+                style={{position:"absolute",
+                         top: top, left: left}} >
+                <div className={"dishesInShopPage-cart-container"}>
+                    <div className={"dishesInShopPage-cart-item"}>
+                        <img src={"https://jupiterlsy.s3.ca-central-1.amazonaws.com/shop|lsy's_House"}
+                             className="card-img-top"
+                             alt={"small dish"}
+                             style={{height: "50px", width: "70px"}}/>
+                        <div>
+                            <p style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "13px"}}>
+                                Chicken Breast with Curry Sauce on Rice
+                            </p>
+                            <p style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "11px"}}>
+                                lsy's seafood Dinning Hall
+                            </p>
+                        </div>
+                        <div style={{placeSelf: "center"}}>+</div>
+                        <div style={{placeSelf: "center"}}>29</div>
+                        <div style={{placeSelf: "center"}}>-</div>
+                    </div>
+                    <div className={"dishesInShopPage-cart-item"}>
+                        <img src={"https://jupiterlsy.s3.ca-central-1.amazonaws.com/shop|lsy's_House"}
+                             className="card-img-top"
+                             alt={"small dish"}
+                             style={{height: "50px", width: "70px"}}/>
+                        <div>
+                            <p style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "13px"}}>
+                                Chicken Breast with Curry Sauce on Rice
+                            </p>
+                            <p style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "11px"}}>
+                                lsy's seafood Dinning Hall
+                            </p>
+                        </div>
+                        <div style={{placeSelf: "center"}}>+</div>
+                        <div style={{placeSelf: "center"}}>29</div>
+                        <div style={{placeSelf: "center"}}>-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
 
 const Dropdown = (props) => {
     const [isOpen, setIsOpen] = useState("");
@@ -486,16 +689,19 @@ const ErrorFromServer = (props) => {
 //         })
 // }
 
-
-export default ShopCard;
 export {
+    ShopCard,
+    DishCard,
     // CheckTokenInFirstLoad,
     FormGroup,
     CheckBox,
     AlertText,
-    // ArrayTags,
-    // ArrayInputTags,
+    ArrayTags,
+    SmallArrayTags,
+    ArrayInputTags,
+    CartDropdown,
     Dropdown,
-    // NoPermissionPage,
-    // LoadingDataPage,
-    ErrorFromServer,};
+    NoPermissionPage,
+    LoadingDataPage,
+    ErrorFromServer,
+};

@@ -1,153 +1,173 @@
 import React, {Component} from 'react';
 import {withRouter} from "react-router-dom";
-import ShopCard, {
-    ProfileTableInDrawer,
-    LoginAndRegisterInDrawer,
-    HeaderWithDrawer,
-    CheckTokenInFirstLoad} from "./Widgets";
-import checkTokenAndFillProfile from '../Redux/token/tokenSlice'
-import {useSelector} from "react-redux";
+import {
+    ShopCard,
+    LoadingDataPage,
+    NoPermissionPage,
+    // CheckTokenInFirstLoad,
+} from "./Widgets";
+import HeaderAndDrawer from "./HeaderAndDrawer";
+import {connect} from "react-redux";
+import {listShop, listShopUnderOwner} from "../Services/shop";
+import {resetServer} from "../Redux/server/actionCreator";
+import {listAllShops} from "../Redux/shop/actionCreator"
+import {loadPage} from "../Support/supportFunctions";
+
 
 class Home extends Component{
 
-    constructor(prop) {
-        super(prop);
+    constructor(props) {
+        super(props);
         this.state = {
-            loginStatus: false,
-            info: {},
-            shopsList: [],
+            isLoading: true,
+            errorsFromServer: {isValid: true, message: ""},
+        };
+    }
+
+    mainContent = () => {
+        if(this.props.server.isLoading){
+            return (
+                <LoadingDataPage message={"the page is loading..."}/>
+            )
+        }
+        else if(this.props.server.errorsFromServer.isValid){
+            return(
+                <div className="homepage-container">
+                    {
+                        (this.props.server.mainContent || []).map((shop, i) => (
+                                <ShopCard
+                                    key={i}
+                                    src={shop.imgUrl}
+                                    alt={shop.name + " picture"}
+                                    shopName={shop.shopName}
+                                    categoriesList={shop.categories}/>
+                            )
+                        )
+                    }
+                </div>
+            )
+        }
+        else{
+            return(
+                <NoPermissionPage message={"something wrong from server"}/>
+            )
         }
     }
 
-    //layout
-    mainContent = () => {
-        return(
-            <div className="homepage-container">
-                {
-                    (this.state.shopsList || []).map((shop, i) => (
-                        <ShopCard
-                            key={i + 1}
-                            src={shop.imgUrl}
-                            alt={shop.name + "picture"}
-                            shopName={shop.name}
-                            categoriesList={shop.categories}/>
-
-                        )
-                    )
-                }
-            </div>
-        )
-    }
-
-    //layout
+    // button series
     buttonSeries = () => {
-        return(
-               (this.state.info == null)?
-                (null):
-                (((this.state.info.role==="customer") &&
-                (<button className={"btn btn-primary btn-sm active"}
-                >
-                    history orders
-                </button>))
-                ||
-                ((this.state.info.role==="owner") &&
-                (<button className={"btn btn-primary btn-sm active"}
-                         onClick={() => {this.props.history.push("/shops/list")}}
-                >
+        let buttonArray = []
+        if(JSON.stringify(this.props.currentUser) !== "{}"
+            && this.props.currentUser.roles.includes("owner")){
+            buttonArray.push(
+                <button
+                    key={"owner"}
+                    className={"btn btn-primary btn-sm active"}
+                    onClick={() => {this.props.history.push("/shops/list")}}>
                     manage my shop
-                </button>)))
-        )
+                </button>
+            )
+        }
+        if(JSON.stringify(this.props.currentUser) !== "{}"
+            && this.props.currentUser.roles.includes("customer")){
+            buttonArray.push(
+                <button
+                    key={"customer"}
+                    className={"btn btn-primary btn-sm active"}>
+                    history orders
+                </button>
+            )
+        }
+        return buttonArray;
     }
 
-    //layout
-    drawerContent = () => {
+    //layout buttonSeries has nothing to do with mainData
+    // buttonSeries = () => {
+    //     let buttonArray = []
+    //     if(this.props.currentUser.roles.includes("owner")){
+    //         buttonArray.push(
+    //             <button className={"btn btn-primary btn-sm active"}
+    //                     onClick={() => {this.props.history.push("/shops/list")}}>
+    //                 manage my shop
+    //             </button>
+    //         )
+    //     }
+    //     if(this.props.currentUser.roles.includes("customer")){
+    //         buttonArray.push(
+    //             <button className={"btn btn-primary btn-sm active"}>
+    //                 history orders
+    //             </button>
+    //         )
+    //     }
+    //     return buttonArray;
+    // }
 
+
+    render(){
         return(
-            (!this.state.loginStatus)?
-            <LoginAndRegisterInDrawer
-                link={this.props}/>:
-            <ProfileTableInDrawer
-                user={this.state.info}
-                changeLogoutStatus={this.logoutStatus}/>
+            <div>
+                <HeaderAndDrawer
+                    mainContent={this.mainContent()}
+                    buttonSeries={this.buttonSeries()}/>
+            </div>
+
         )
-    }
-
-
-    // after logout, change the loginStatus and delete token
-    logoutStatus = () => {
-        localStorage.removeItem("token");
-        this.setState({
-            info: {},
-            loginStatus: false,
-        })
     }
 
     componentDidMount() {
 
-        // verify token, and show user info in the drawer, if not valid, the token will be clear
-        // let token = localStorage.getItem("token");
-        // if(!token){
-        //     this.setState({
-        //         info: {},
-        //         loginStatus: false,
+        // this.props.resetServer();
+        loadPage(listShop());
+        // this.setState({
+        //     isLoading: true,
+        // });
+        // listShop()
+        //     .then(res => {
+        //     if(res.result != null){
+        //         this.props.listAllShops(res.result);
+        //         this.setState({
+        //             isLoading: false,
+        //             errorsFromServer: {
+        //                 isValid: true,
+        //                 message: res.msg,
+        //             }
+        //         })
+        //     }
+        //     else{
+        //         this.setState({
+        //             isLoading: false,
+        //             errorsFromServer: {
+        //                 isValid: false,
+        //                 message: res.msg,
+        //             }
+        //         })
+        //     }
+        // })
+        //     .catch(res => {
+        //         this.setState({
+        //             isLoading: false,
+        //             errorsFromServer: {
+        //                 isValid: false,
+        //                 message: res.msg,
+        //             }
+        //         })
         //     })
-        // }
-        // else {
-        //     fetch("/v1/profile", {
-        //         "method": "GET",
-        //         "headers": {
-        //             "Content-Type": "application/json",
-        //             "token": token,
-        //         },
-        //     })
-        //     .then(res => res.json())
-        //     .then(data => {
-        //         if(data.result != null){
-        //             this.setState({
-        //                 info: data.result,
-        //                 loginStatus: true,
-        //             })
-        //         }
-        //         else{
-        //             localStorage.removeItem("token");
-        //             this.setState({
-        //                 info: {},
-        //                 loginStatus: false,
-        //             })
-        //         }
-        //     })
-        // }
-
-        checkTokenAndFillProfile();
-
-        // list all shops
-        // get shop information
-        fetch("/v1/shops", {
-            "method": "GET",
-            "headers": {
-                "Content-Type": "application/json",
-                "token": "",
-            },
-        })
-        .then(res => res.json())
-        .then(data => {
-            this.setState({
-                shopsList: data.result,
-            });
-        })
-    }
-
-    render(){
-        return(
-            <HeaderWithDrawer
-                pageContent={this.mainContent()}
-                buttonSeries={this.buttonSeries()}
-                drawerTitle={"Profile"}
-                // drawerContent={this.drawerContent()}
-                drawerContent ={CheckTokenInFirstLoad()}
-            />
-        )
     }
 }
 
-export default withRouter(Home);
+const mapStateToProps = (state, ownProps) => {
+    return{
+        server: state.server,
+        currentUser: state.user.profile,
+    }
+}
+
+const mapDispatchToProps = {
+    // listAllShops,
+    resetServer,
+}
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(withRouter(Home));
