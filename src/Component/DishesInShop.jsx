@@ -78,7 +78,7 @@ class DishesInShop extends Component{
         buttonArray.push(
             <CartDropdown
                 key={"cart"}
-                cart={this.props.cartItems}
+                // cart={this.props.cartItems}
             />
         );
         return buttonArray;

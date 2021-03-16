@@ -7,15 +7,16 @@ import {
     ShopManageCollapse,
     // CheckTokenInFirstLoad,
     NoPermissionPage,
-    LoadingDataPage, ShopCard,
+    LoadingDataPage, ShopCard, DishManageCollapse,
 } from "./Widgets";
 import HeaderAndDrawer from "./HeaderAndDrawer";
 import {listShopUnderOwner} from "../Services/shop";
 import {resetServer} from "../Redux/server/actionCreator";
 import {deleteProfile} from "../Redux/user/actionCreator";
+import {listDishesUnderOwner} from "../Services/dish";
 
 
-class ShopsManage extends Component{
+class DishesManage extends Component{
 
     constructor(props) {
         super(props);
@@ -23,6 +24,7 @@ class ShopsManage extends Component{
 
     // layout
     mainContent = () => {
+
         if(this.props.server.isLoading){
             return (
                 <LoadingDataPage message={"the page is loading..."}/>
@@ -30,21 +32,22 @@ class ShopsManage extends Component{
         }
         else if(this.props.server.errorsFromServer.isValid){
             return(
-                <Accordion className={"shopListPage-container"}>
-                    <div className={"shopListPage-collapse"}>
+                <Accordion className={"dishListPage-container"}>
+                    <div className={"dishListPage-collapse"}>
                         {
                             (this.props.server.mainContent || []).map((item, i) => (
-                                <ShopManageCollapse
+                                <DishManageCollapse
                                     key={i + 1}
-                                    shop={
+                                    dish={
                                         {
-                                            id: item.id,
+                                            dishId: item.id,
+                                            shopId: item.shopId,
                                             ownerId: item.ownerId,
-                                            shopName: item.shopName,
+                                            dishName: item.name,
                                             desc: item.desc,
                                             imgUrl: item.imgUrl,
                                             categories: item.categories,
-                                            address: item.address,
+                                            price: item.price,
                                             createAt: item.createAt,
                                             updateAt: item.modifiedAt,
                                         }
@@ -76,7 +79,7 @@ class ShopsManage extends Component{
                     className={"btn btn-primary btn-sm active"}
                     onClick={() => {
                         resetServer();
-                        this.props.history.push("/add/shops")
+                        this.props.history.push(`/add/shops/${this.props.match.params.shopId}/dishes`)
                     }}>
                     add
                 </button>
@@ -89,7 +92,7 @@ class ShopsManage extends Component{
                     className={"btn btn-primary btn-sm active"}
                     onClick={() => {
                         this.props.resetServer();
-                        this.props.history.push("/");
+                        this.props.history.push("/manage/shops");
                     }}>
                     back
                 </button>
@@ -123,8 +126,10 @@ class ShopsManage extends Component{
     }
 
     componentDidMount() {
-
-        loadPage(listShopUnderOwner(localStorage.getItem("Authorization")));
+        loadPage(listDishesUnderOwner(
+            this.props.match.params.shopId,
+            localStorage.getItem("Authorization")
+        ));
     }
 }
 
@@ -143,4 +148,4 @@ const mapDispatchToProps = {
 export default connect(
     mapStateToProps,
     mapDispatchToProps,
-)(withRouter(ShopsManage));
+)(withRouter(DishesManage));

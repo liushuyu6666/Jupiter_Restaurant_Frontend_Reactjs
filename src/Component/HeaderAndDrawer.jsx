@@ -3,6 +3,7 @@ import ShopCard, {FormGroup, SmallArrayTags} from "./Widgets";
 import {connect} from "react-redux"
 import {withRouter} from "react-router-dom";
 import {deleteProfile} from "../Redux/user/actionCreator"
+import {resetServer} from "../Redux/server/actionCreator";
 import {verify} from "../Services/auth";
 
 class HeaderAndDrawer extends Component{
@@ -50,6 +51,8 @@ class HeaderAndDrawer extends Component{
     logout = () => {
         localStorage.removeItem("Authorization");
         this.props.deleteProfile();
+        this.props.resetServer();
+        window.location.reload(true);
     }
 
     // do nothing
@@ -174,6 +177,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
     deleteProfile,
+    resetServer,
 }
 
 export default connect(

@@ -5,18 +5,16 @@ import {
     BrowserRouter as Router,
     Switch,
     Route,
-    Link,
 } from "react-router-dom";
 import Register from "./Component/Register";
 import Login from "./Component/Login";
-import FlexTest from "./Component/FlexTest";
-import AddNewShop from "./Component/AddNewShop";
-import ShopList from "./Component/ShopList";
-import TestWidgets from "./Component/TestWidgets";
-import DishList from "./Component/DishList";
 import DishesInShop from "./Component/DishesInShop";
 import ShopsManage from "./Component/ShopsManage";
 import ShopEdit from "./Component/ShopEdit";
+import ShopAdd from "./Component/ShopAdd";
+import DishesManage from "./Component/DishesManage";
+import DishAdd from "./Component/DishAdd";
+import OrdersList from "./Component/OrdersList";
 
 
 function App() {
@@ -26,23 +24,34 @@ function App() {
               <Route path="/" exact>
                   <Home />
               </Route>
+              <Route path="/shops/:shopId/dishes" exact>
+                  <DishesInShop />
+              </Route>
+              <Route path="/orders" exact>
+                  <OrdersList />
+              </Route>
+
+              <Route path="/manage/shops" exact>
+                  <ShopsManage />
+              </Route>
+              <Route path="/add/shops" exact>
+                  <ShopAdd />
+              </Route>
+              <Route path="/edit/shops/:shopId" exact>
+                  <ShopEdit />
+              </Route>
+              <Route path="/manage/shops/:shopId/dishes" exact>
+                  <DishesManage />
+              </Route>
+              <Route path="/add/shops/:shopId/dishes" exact>
+                  <DishAdd />
+              </Route>
+
               <Route path="/register" exact>
                   <Register />
               </Route>
               <Route path="/login" exact>
                   <Login />
-              </Route>
-              <Route path="/shops/:shopId/dishes">
-                  <DishesInShop />
-              </Route>
-              {/*<Route path="/shops/add">*/}
-              {/*    <AddNewShop />*/}
-              {/*</Route>*/}
-              <Route path="/manage/shops">
-                  <ShopsManage />
-              </Route>
-              <Route path="/edit/shops/:shopId">
-                  <ShopEdit />
               </Route>
               {/*<Route path="/dishes/list">*/}
               {/*    <DishList />*/}

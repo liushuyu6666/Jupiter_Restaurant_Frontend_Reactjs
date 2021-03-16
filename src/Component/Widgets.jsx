@@ -1,10 +1,18 @@
-import React, {Component, useDebugValue, useState, useRef} from 'react';
-import {withRouter} from "react-router-dom";
+import React, {Component, useEffect, useState, useRef} from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import {addItemInCart} from "../Redux/cart/actionCreator";
+import {addItemInCart, deleteItemFromCart, countItems, resetCart} from "../Redux/cart/actionCreator";
+import {Accordion, Button, Card} from "react-bootstrap";
+import {resetServer} from "../Redux/server/actionCreator";
+import {useHistory} from "react-router";
+import {deleteShop} from "../Services/shop";
+import {deleteDish} from "../Services/dish";
+import {createOrder} from "../Services/order";
 
+
+/******* layout *******/
 const ShopCard = (props) => {
 
+    const history = useHistory();
     let lengthOfTag = 0;
 
     const randomColor = () => {
@@ -22,16 +30,32 @@ const ShopCard = (props) => {
         return beautifulColor[Math.floor(Math.random() * 10)];
     }
 
+    const click = (event) => {
+        // console.log(event.target);
+        resetServer();
+        history.push(`/shops/${props.shopId}/dishes`);
+    }
+
     return(
-        <div className="card" style={{height: "220px", width: "300px", backgroundColor: "white"}}>
-            <img src={props.src}
+        <div
+            className="card"
+            style={{height: "220px", width: "300px", backgroundColor: "white"}}
+        >
+            <img
+                id={props.shopId}
+                 src={props.src}
                  className="card-img-top"
                  alt={props.alt}
-                 style={{height: "160px", width: "300px"}}/>
+                 style={{height: "160px", width: "300px", cursor: "pointer"}}
+                 onClick={click}/>
             <div className="card-body" style={{padding: "0 0 0 3px"}}>
                 <label
-                    style={{margin: "3px 0 6px 3px", fontFamily: "Michroma", fontSize: "23px"}}>
+                    id={props.shopId}
+                    style={{margin: "3px 0 6px 3px", fontFamily: "Michroma", fontSize: "23px", cursor: "pointer"}}
+                    onClick={click}
+                >
                     {props.shopName}
+
                 </label>
                 <div  className={"homepage-tags-container"}
                     style={{margin: "0 0 0 3px", fontSize:"15px"}}>
@@ -95,12 +119,15 @@ const DishCard = (props) => {
         const ownerId = props.ownerId;
         const dishName = props.dishName;
         const shopName = props.shopName;
+        const imgUrl = props.src;
+
         dispatch(
             addItemInCart(
                 {"dishId": dishId,
                 "shopId": shopId,
                 "ownerId": ownerId,
                 "dishName": dishName,
+                "imgUrl": imgUrl,
                 "shopName": shopName,}
             )
         );
@@ -163,6 +190,450 @@ const DishCard = (props) => {
         </div>
     )
 }
+
+const ShopManageCollapse = (props) => {
+    const dispatch = useDispatch();
+    const history = useHistory();
+    const [isOpen, setIsOpen] = useState({
+        button: "btn btn-link collapsed",
+        collapse: "collapse",
+        status: false,
+        buttonEnabled: true,
+    });
+
+    const clickCollapse = (event) => {
+        event.preventDefault();
+        if(!isOpen.status) {
+            setIsOpen({
+                button: "btn btn-link collapsed",
+                collapse: "collapsing",
+                status: true,
+                buttonEnabled: false
+            })
+            setTimeout(() => {
+                setIsOpen(
+                    {
+                        button: "btn btn-link",
+                        collapse: "collapse show",
+                        status: true,
+                        buttonEnabled: true,
+                        height: "auto"
+                    }
+                )
+            }, 300);
+        }
+        else {
+            setIsOpen(
+                {
+                    button: "btn btn-link collapsed",
+                    collapse: "collapsing",
+                    status: false,
+                    buttonEnabled: false
+                }
+            )
+            setTimeout(() => {
+                setIsOpen(
+                    {
+                        button: "btn btn-link",
+                        collapse: "collapse",
+                        status: false,
+                        buttonEnabled: true
+                    }
+                )
+            }, 300);
+        }
+    }
+
+    const deleteItem = (event) => {
+        if(window.confirm("delete this shop permanently?")){
+            deleteShop(event.target.id,
+                localStorage.getItem("Authorization"))
+                .then(res => {
+                    if(res.result != null){
+                        window.alert(res.msg);
+                        window.location.reload(true);
+                    }
+                    else{
+                        window.alert(res.msg);
+                    }
+                })
+                .catch(err => {
+                    window.alert("something wrong from server when delete");
+                })
+        }
+
+    }
+
+    return(
+        <Card>
+            <Card.Header style={{backgroundColor: "#609E99"}}>
+                <h5 className="mb-0 d-flex justify-content-between">
+                    <Accordion.Toggle as={Button} variant="link" eventKey={props.eventKey}
+                                      className={`${isOpen.button}`}
+                        // data-toggle="collapse"
+                        // data-target="#collapseOne"
+                                      disabled={!isOpen.buttonEnabled}
+                                      style={{color: "white"}}
+                                      onClick={clickCollapse}>
+                        {props.shop.shopName}
+                    </Accordion.Toggle>
+                    <button
+                        className={"btn btn-link"}
+                        style={{color: "white"}}>
+                        {`${props.shop.address.city}, ${props.shop.address.country}`}
+                    </button>
+                </h5>
+            </Card.Header>
+            <Accordion.Collapse eventKey={props.eventKey}>
+                <Card.Body>
+                    {
+                        // (this.state.isCheckStratum)?
+                        // check detail
+                        (<div className={"shopListPage-collapse-list-detail"}>
+                            <div
+                                className={"shopListPage-collapse-list-detail-leftColumn"}
+                            >
+                                <FormGroup id={"street"}
+                                           inputValue={props.shop.address.street}
+                                           show={"street"}
+                                           type={"text"}
+                                           change={() => {}}/>
+                                <FormGroup id={"createAt"}
+                                           inputValue={props.shop.createAt}
+                                           show={"create time:"}
+                                           type={"text"}
+                                           change={() => {}}/>
+                                <FormGroup id={"modifiedAt"}
+                                           inputValue={props.shop.updateAt}
+                                           show={"update time:"}
+                                           type={"text"}
+                                           change={() => {}}/>
+                                {/*<ArrayTags id={"owner"}*/}
+                                {/*           show={"owners"}*/}
+                                {/*           arrayValues={this.state.ownersList}/>*/}
+                            </div>
+                            <div className={"shopListPage-collapse-list-detail-rightColumn"}>
+                                <ArrayTags
+                                    id={"category"}
+                                    show={"categories"}
+                                    arrayValues={props.shop.categories}/>
+                                <img
+                                    src={props.shop.imgUrl}
+                                    alt={props.shop.shopName}
+                                    width="200" height="120"/>
+                            </div>
+                            <div className={"shopListPage-collapse-list-detail-description"}>
+                                <FormGroup id={"desc"}
+                                           inputValue={props.shop.desc}
+                                           show={"desc"}
+                                           type={"text"}
+                                           change={() => {}}/>
+                            </div>
+                            <div className={"shopListPage-collapse-list-detail-leftButton"}>
+                                <button
+                                    id={props.shop.id}
+                                    className={"btn btn-primary btn-sm active"}
+                                    onClick={(event) => {
+                                        dispatch(resetServer());
+                                        history.push(`/edit/shops/${event.target.id}`);
+                                    }}>
+                                    edit
+                                </button>
+                            </div>
+                            <div className="shopListPage-collapse-list-detail-deleteButton">
+                                <button id={props.shop.id}
+                                        className={"btn btn-primary btn-sm active"}
+                                        onClick={deleteItem}>
+                                    delete
+                                </button>
+                            </div>
+                            <div className={"shopListPage-collapse-list-detail-rightButton"}>
+                                <button
+                                    id={props.shop.id}
+                                    className={"btn btn-primary btn-sm active"}
+                                    onClick={(event) => {
+                                        dispatch(resetServer());
+                                        history.push(`/manage/shops/${event.target.id}/dishes`)
+                                    }}>
+                                    check dishes
+                                </button>
+                            </div>
+                        </div>)
+                    }
+                </Card.Body>
+            </Accordion.Collapse>
+        </Card>
+    )
+}
+
+const DishManageCollapse = (props) => {
+    const dispatch = useDispatch();
+    const history = useHistory();
+    const [isOpen, setIsOpen] = useState({
+        button: "btn btn-link collapsed",
+        collapse: "collapse",
+        status: false,
+        buttonEnabled: true,
+    });
+
+    const clickCollapse = (event) => {
+        event.preventDefault();
+        if(!isOpen.status) {
+            setIsOpen({
+                button: "btn btn-link collapsed",
+                collapse: "collapsing",
+                status: true,
+                buttonEnabled: false
+            })
+            setTimeout(() => {
+                setIsOpen(
+                    {
+                        button: "btn btn-link",
+                        collapse: "collapse show",
+                        status: true,
+                        buttonEnabled: true,
+                        height: "auto"
+                    }
+                )
+            }, 300);
+        }
+        else {
+            setIsOpen(
+                {
+                    button: "btn btn-link collapsed",
+                    collapse: "collapsing",
+                    status: false,
+                    buttonEnabled: false
+                }
+            )
+            setTimeout(() => {
+                setIsOpen(
+                    {
+                        button: "btn btn-link",
+                        collapse: "collapse",
+                        status: false,
+                        buttonEnabled: true
+                    }
+                )
+            }, 300);
+        }
+    }
+
+    const deleteItem = (event) => {
+        if(window.confirm("delete this dish permanently?")){
+            console.log(event.target.id);
+            deleteDish(event.target.id,
+                localStorage.getItem("Authorization"))
+                .then(res => {
+                    if(res.result != null){
+                        window.alert(res.msg);
+                        window.location.reload(true);
+                    }
+                    else{
+                        window.alert(res.msg);
+                    }
+                })
+                .catch(err => {
+                    window.alert("something wrong from server when delete");
+                })
+        }
+
+    }
+
+    return(
+        <Card>
+            <Card.Header style={{backgroundColor: "#609E99"}}>
+                <h5 className="mb-0 d-flex justify-content-between">
+                    <Accordion.Toggle as={Button} variant="link" eventKey={props.eventKey}
+                                      className={`${isOpen.button}`}
+                        // data-toggle="collapse"
+                        // data-target="#collapseOne"
+                                      disabled={!isOpen.buttonEnabled}
+                                      style={{color: "white"}}
+                                      onClick={clickCollapse}>
+                        {props.dish.dishName}
+                    </Accordion.Toggle>
+                    <button
+                        className={"btn btn-link"}
+                        style={{color: "white"}}>
+                        {`$ ${props.dish.price}`}
+                    </button>
+                </h5>
+            </Card.Header>
+            <Accordion.Collapse eventKey={props.eventKey}>
+                <Card.Body>
+                    {
+                        // (this.state.isCheckStratum)?
+                        // check detail
+                        (<div className={"dishListPage-collapse-list-detail"}>
+                            <div
+                                className={"dishListPage-collapse-list-detail-leftColumn"}
+                            >
+                                <FormGroup id={"createAt"}
+                                           inputValue={props.dish.createAt}
+                                           show={"create time:"}
+                                           type={"text"}
+                                           change={() => {}}/>
+                                <FormGroup id={"modifiedAt"}
+                                           inputValue={props.dish.updateAt}
+                                           show={"update time:"}
+                                           type={"text"}
+                                           change={() => {}}/>
+                                {/*<ArrayTags id={"owner"}*/}
+                                {/*           show={"owners"}*/}
+                                {/*           arrayValues={this.state.ownersList}/>*/}
+                            </div>
+                            <div className={"dishListPage-collapse-list-detail-rightColumn"}>
+                                <ArrayTags
+                                    id={"category"}
+                                    show={"categories"}
+                                    arrayValues={props.dish.categories}/>
+                                <img
+                                    src={props.dish.imgUrl}
+                                    alt={props.dish.dishName}
+                                    width="200" height="120"/>
+                            </div>
+                            <div className={"dishListPage-collapse-list-detail-description"}>
+                                <FormGroup id={"desc"}
+                                           inputValue={props.dish.desc}
+                                           show={"desc"}
+                                           type={"text"}
+                                           change={() => {}}/>
+                            </div>
+                            <div className={"dishListPage-collapse-list-detail-leftButton"}>
+                                <button
+                                    id={props.dish.id}
+                                    className={"btn btn-primary btn-sm active"}
+                                    onClick={(event) => {
+                                        dispatch(resetServer());
+                                        // history.push(`/edit/shops/${event.target.id}`);
+                                    }}>
+                                    edit
+                                </button>
+                            </div>
+                            <div className="dishListPage-collapse-list-detail-deleteButton">
+                                <button id={props.dish.dishId}
+                                        className={"btn btn-primary btn-sm active"}
+                                        onClick={deleteItem}>
+                                    delete
+                                </button>
+                            </div>
+                            <div className={"dishListPage-collapse-list-detail-rightButton"}>
+                                <button className={"btn btn-primary btn-sm active"}>
+                                    check reviews
+                                </button>
+                            </div>
+                        </div>)
+                    }
+                </Card.Body>
+            </Accordion.Collapse>
+        </Card>
+    )
+}
+
+const OrderManageCollapse = (props) => {
+    const history = useHistory();
+    const [isOpen, setIsOpen] = useState({
+        button: "btn btn-link collapsed",
+        collapse: "collapse",
+        status: false,
+        buttonEnabled: true,
+    });
+
+    const clickCollapse = (event) => {
+        event.preventDefault();
+        if(!isOpen.status) {
+            setIsOpen({
+                button: "btn btn-link collapsed",
+                collapse: "collapsing",
+                status: true,
+                buttonEnabled: false
+            })
+            setTimeout(() => {
+                setIsOpen(
+                    {
+                        button: "btn btn-link",
+                        collapse: "collapse show",
+                        status: true,
+                        buttonEnabled: true,
+                        height: "auto"
+                    }
+                )
+            }, 300);
+        }
+        else {
+            setIsOpen(
+                {
+                    button: "btn btn-link collapsed",
+                    collapse: "collapsing",
+                    status: false,
+                    buttonEnabled: false
+                }
+            )
+            setTimeout(() => {
+                setIsOpen(
+                    {
+                        button: "btn btn-link",
+                        collapse: "collapse",
+                        status: false,
+                        buttonEnabled: true
+                    }
+                )
+            }, 300);
+        }
+    }
+
+    return(
+        <Card>
+            <Card.Header style={{backgroundColor: "#609E99"}}>
+                <h5 className="mb-0 d-flex justify-content-between">
+                    <Accordion.Toggle as={Button} variant="link" eventKey={props.eventKey}
+                                      className={`${isOpen.button}`}
+                        // data-toggle="collapse"
+                        // data-target="#collapseOne"
+                                      disabled={!isOpen.buttonEnabled}
+                                      style={{color: "white"}}
+                                      onClick={clickCollapse}>
+                        {`${props.order.createAt.substring(0,10)} ${props.order.createAt.substring(11,16)}`}
+                    </Accordion.Toggle>
+                    <button
+                        className={"btn btn-link"}
+                        style={{color: "white"}}>
+                        {`total: ${props.order.dishDetails.length}`}
+                    </button>
+                </h5>
+            </Card.Header>
+            <Accordion.Collapse eventKey={props.eventKey}>
+                <Card.Body>
+                    <table className="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">No.</th>
+                                <th scope="col">Dish Name</th>
+                                <th scope="col">Shop Name</th>
+                                <th scope="col">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {
+                            (props.order.dishDetails.map((item, i) => (
+                                <tr>
+                                    <th scope="row">{i + 1}</th>
+                                    <td>{item.dishName}</td>
+                                    <td>{item.shopName}</td>
+                                    <td>{item.amount}</td>
+                                </tr>
+                            )))
+                        }
+                        </tbody>
+                    </table>
+                </Card.Body>
+            </Accordion.Collapse>
+        </Card>
+    )
+}
+
+/******* small widgets *************/
 
 const FormGroup = (props) => {
 
@@ -316,78 +787,6 @@ const ArrayInputTags = (props) => {
     )
 }
 
-const CartDropdown = (props) => {
-
-    const cartRef = useRef();
-    const [isOpen, setIsOpen] = useState("");
-    const [top, setTop] = useState("");
-    const [left, setLeft] = useState("");
-    const winWidth = window.innerWidth;
-
-    const toggle = (event) => {
-        event.preventDefault();
-        const {offsetTop, offsetLeft, offsetHeight, offsetWidth} = cartRef.current;
-
-        setTop((offsetTop + offsetHeight).toString() + "px");
-        setLeft((winWidth - 400 - offsetLeft).toString() + "px");
-        if(isOpen === "") setIsOpen("show");
-        else setIsOpen("")
-    }
-
-    return(
-        <div ref={cartRef}
-             className={"dropdown"}>
-            <button id="dropdownMenuLink"
-                    className="btn btn-secondary btn-sm dropdown-toggle"
-                    onClick={toggle}>
-                {`cart item(${3})`}
-            </button>
-            <div
-                id={"cart"}
-                className={`dropdown-menu dropdown-menu-right ${isOpen}`}
-                style={{position:"absolute",
-                         top: top, left: left}} >
-                <div className={"dishesInShopPage-cart-container"}>
-                    <div className={"dishesInShopPage-cart-item"}>
-                        <img src={"https://jupiterlsy.s3.ca-central-1.amazonaws.com/shop|lsy's_House"}
-                             className="card-img-top"
-                             alt={"small dish"}
-                             style={{height: "50px", width: "70px"}}/>
-                        <div>
-                            <p style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "13px"}}>
-                                Chicken Breast with Curry Sauce on Rice
-                            </p>
-                            <p style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "11px"}}>
-                                lsy's seafood Dinning Hall
-                            </p>
-                        </div>
-                        <div style={{placeSelf: "center"}}>+</div>
-                        <div style={{placeSelf: "center"}}>29</div>
-                        <div style={{placeSelf: "center"}}>-</div>
-                    </div>
-                    <div className={"dishesInShopPage-cart-item"}>
-                        <img src={"https://jupiterlsy.s3.ca-central-1.amazonaws.com/shop|lsy's_House"}
-                             className="card-img-top"
-                             alt={"small dish"}
-                             style={{height: "50px", width: "70px"}}/>
-                        <div>
-                            <p style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "13px"}}>
-                                Chicken Breast with Curry Sauce on Rice
-                            </p>
-                            <p style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "11px"}}>
-                                lsy's seafood Dinning Hall
-                            </p>
-                        </div>
-                        <div style={{placeSelf: "center"}}>+</div>
-                        <div style={{placeSelf: "center"}}>29</div>
-                        <div style={{placeSelf: "center"}}>-</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
-
 const Dropdown = (props) => {
     const [isOpen, setIsOpen] = useState("");
     const [selection, setSelection] = useState("customer");
@@ -426,6 +825,146 @@ const Dropdown = (props) => {
 
     )
 }
+
+/******** cart ************/
+
+const CartDropdown = (props) => {
+
+    const cartRef = useRef();
+    const cart = useSelector(state => state.cart);
+    const dispatch = useDispatch();
+    const [isOpen, setIsOpen] = useState("");
+    const [top, setTop] = useState("");
+    const [left, setLeft] = useState("");
+    const winWidth = window.innerWidth;
+
+    const toggle = (event) => {
+        event.preventDefault();
+        const {offsetTop, offsetLeft, offsetHeight, offsetWidth} = cartRef.current;
+
+        setTop((offsetTop + offsetHeight).toString() + "px");
+        setLeft((winWidth - 430 - offsetLeft).toString() + "px");
+        if(isOpen === "") setIsOpen("show");
+        else setIsOpen("")
+    }
+
+    const saveOrder = () => {
+        // console.log(cart.cartItems);
+        const items = {};
+        cart.cartItems.map(item => {
+            items[item.dishId] = item.amount;
+        })
+        const body = {
+            "dishAmount": items,
+        }
+
+        const jwt = localStorage.getItem("Authorization");
+        createOrder(jwt, body)
+            .then(res => {
+                if(res.result !== null){
+                    dispatch(resetCart());
+                    window.alert(res.msg);
+                }
+                else{
+                    window.alert(res.msg);
+                }
+            })
+            .catch(err => {
+                window.alert(err.msg);
+            })
+    }
+
+    useEffect(() => {
+        dispatch(countItems());
+    }, [cart.cartItems]);
+
+    const mainContent = () => {
+        const items = [];
+        if(cart.cartItems.length === 0){
+            items.push(
+                <div className={"cart-item-container"}>
+                    <img src={"http://s3.ca-central-1.amazonaws.com/jupiterlsy/sad_face_for_block_page.png"}
+                         className="card-img-top"
+                         alt={"small dish"}
+                         style={{height: "50px", width: "70px"}}/>
+                    <div>
+                        <p style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "13px"}}>
+                            No dishes here
+                        </p>
+                        <p style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "11px"}}>
+                            please order food first :)
+                        </p>
+                    </div>
+                </div>
+            )
+        }
+        else{
+            cart.cartItems.map(item => (
+                items.push(
+                    <div className={"cart-item-container"}>
+                        <img src={item.imgUrl}
+                             className="card-img-top"
+                             alt={"small dish"}
+                             style={{height: "50px", width: "70px"}}/>
+                        <div>
+                            <p style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "13px"}}>
+                                {item.dishName}
+                            </p>
+                            <p style={{margin: "3px 0 0px 3px", fontFamily: "Michroma", fontSize: "11px"}}>
+                                {item.shopName}
+                            </p>
+                        </div>
+                        <div
+
+                            style={{placeSelf: "center", cursor: "pointer"}}
+                            onClick={(event) =>
+                            {dispatch(addItemInCart(item))}}>+</div>
+                        <div style={{placeSelf: "center"}}>{item.amount}</div>
+                        <div
+                            style={{placeSelf: "center", cursor: "pointer"}}
+                            onClick={(event) =>
+                            {dispatch(deleteItemFromCart(item))}}>-</div>
+                    </div>
+                )
+            ));
+            items.push(
+                <button
+                    onClick={saveOrder}
+                    className={"btn btn-primary btn-sm active"}
+                >
+                    place the order
+                </button>
+            );
+        }
+        return items;
+    }
+
+    return(
+        <div ref={cartRef}
+             className={"dropdown"}>
+            <button id="dropdownMenuLink"
+                    className="btn btn-secondary btn-sm dropdown-toggle"
+                    onClick={toggle}>
+                {`cart item(${cart.total})`}
+            </button>
+            <div
+                id={"cart"}
+                className={`dropdown-menu dropdown-menu-right ${isOpen}`}
+                style={{position:"absolute",
+                    top: top, left: left}} >
+                <div className={"cart-container"}>
+                    <div className={"cart-item"}>
+                        {
+                            mainContent()
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+/********* auxiliary widgets **************/
 
 const NoPermissionPage = (props) => {
     return(
@@ -497,70 +1036,7 @@ const ErrorFromServer = (props) => {
 // }
 
 
-// const HeaderWithDrawer = (props) => {
-//
-//     const [drawers, setDrawers] = useState({
-//         outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay",
-//         button: "false", var1: "false", var2: "true",
-//         var3: "bmd-layout-backdrop"
-//     })
-//
-//     const toggle = () => {
-//         setDrawers({
-//             outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay bmd-drawer-in",
-//             button: "", var1: "", var2: "", var3: "bmd-layout-backdrop in"
-//         })
-//     }
-//
-//     // side page swipe back
-//     const back = () => {
-//         setDrawers({
-//                 outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay",
-//                 button: "false", var3: "bmd-layout-backdrop"
-//             }
-//         )
-//     }
-//
-//     return (
-//         <div className="d-flex p-2">
-//             <div className={drawers.outer}>
-//                 <header className="bmd-layout-header">
-//                     <nav className="navbar navbar-light"
-//                          style={{backgroundColor: "#FFFFFF",
-//                              padding: "2px 25px 4px 0"}}>
-//                         <button
-//                             className="navbar-toggler"
-//                             type="button"
-//                             style={{border: "0"}}
-//                             onClick={toggle}>
-//                             <i className="fa fa-bars"></i>
-//                         </button>
-//                         <div className="nav navbar-nav">
-//                             <div className="d-flex">
-//                                 {props.buttonSeries}
-//                             </div>
-//                         </div>
-//                     </nav>
-//                 </header>
-//                 <div id="dw-s2" className="bmd-layout-drawer bg-faded">
-//                     <header>
-//                         <div className="navbar-brand">{props.drawerTitle}</div>
-//                     </header>
-//                     <div>
-//                         {props.drawerContent}
-//                     </div>
-//                 </div>
-//                 <div style={{paddingBottom: "10px"}}></div>
-//                 <div style={{backgroundColor: "white", minHeight: "700px"}}>
-//                     {props.pageContent}
-//                 </div>
-//                 <div style={{paddingBottom: "10px"}}></div>
-//                 <div className={drawers.var3}
-//                      onClick={back} />
-//             </div>
-//         </div>
-//     )
-// }
+
 
 
 /************ Archive  *******************************/
@@ -689,9 +1165,77 @@ const ErrorFromServer = (props) => {
 //         })
 // }
 
+// const HeaderWithDrawer = (props) => {
+//
+//     const [drawers, setDrawers] = useState({
+//         outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay",
+//         button: "false", var1: "false", var2: "true",
+//         var3: "bmd-layout-backdrop"
+//     })
+//
+//     const toggle = () => {
+//         setDrawers({
+//             outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay bmd-drawer-in",
+//             button: "", var1: "", var2: "", var3: "bmd-layout-backdrop in"
+//         })
+//     }
+//
+//     // side page swipe back
+//     const back = () => {
+//         setDrawers({
+//                 outer: "bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay",
+//                 button: "false", var3: "bmd-layout-backdrop"
+//             }
+//         )
+//     }
+//
+//     return (
+//         <div className="d-flex p-2">
+//             <div className={drawers.outer}>
+//                 <header className="bmd-layout-header">
+//                     <nav className="navbar navbar-light"
+//                          style={{backgroundColor: "#FFFFFF",
+//                              padding: "2px 25px 4px 0"}}>
+//                         <button
+//                             className="navbar-toggler"
+//                             type="button"
+//                             style={{border: "0"}}
+//                             onClick={toggle}>
+//                             <i className="fa fa-bars"></i>
+//                         </button>
+//                         <div className="nav navbar-nav">
+//                             <div className="d-flex">
+//                                 {props.buttonSeries}
+//                             </div>
+//                         </div>
+//                     </nav>
+//                 </header>
+//                 <div id="dw-s2" className="bmd-layout-drawer bg-faded">
+//                     <header>
+//                         <div className="navbar-brand">{props.drawerTitle}</div>
+//                     </header>
+//                     <div>
+//                         {props.drawerContent}
+//                     </div>
+//                 </div>
+//                 <div style={{paddingBottom: "10px"}}></div>
+//                 <div style={{backgroundColor: "white", minHeight: "700px"}}>
+//                     {props.pageContent}
+//                 </div>
+//                 <div style={{paddingBottom: "10px"}}></div>
+//                 <div className={drawers.var3}
+//                      onClick={back} />
+//             </div>
+//         </div>
+//     )
+// }
+
 export {
     ShopCard,
     DishCard,
+    ShopManageCollapse,
+    DishManageCollapse,
+    OrderManageCollapse,
     // CheckTokenInFirstLoad,
     FormGroup,
     CheckBox,

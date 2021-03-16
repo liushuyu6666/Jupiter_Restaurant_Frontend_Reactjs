@@ -34,4 +34,20 @@ const get = (url, jwt=null) => {
     });
 }
 
-export {post, get}
+const del = (url, jwt) => {
+    return fetch(url, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": jwt !== null? "Bearer "
+                + jwt : ""
+        }
+    }).then(response => {
+        if(response.ok){
+            return response.json();
+        }
+        throw response.json();
+    });
+}
+
+export {post, get, del}

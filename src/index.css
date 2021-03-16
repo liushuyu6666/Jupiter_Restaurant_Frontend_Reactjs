@@ -88,21 +88,6 @@ code {
   row-gap: 40px;
 }
 
-.dishesInShopPage-cart-container {
-  display: grid;
-  grid-template-columns: 5px 400px 5px;
-  grid-template-rows: 5px auto;
-}
-
-.dishesInShopPage-cart-item {
-  display: grid;
-  grid-row: 2;
-  grid-column: 2/3;
-  grid-template-columns: 70px 230px 15px 20px 15px;
-  grid-template-rows: auto;
-  row-gap: 10px;
-}
-
 /*** shopList page */
 
 .shopListPage-container{
@@ -119,14 +104,16 @@ code {
   grid-column: 2/3;
 }
 
+/* shopList-collapse */
+
 .shopListPage-collapse-list-detail{
   display: grid;
   grid-template-rows: 7fr 2fr 1fr;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 4fr 1fr 4fr;
   grid-template-areas:
-    " leftColumn rightColumn "
-    " description description "
-    " leftButton rightButton ";
+    " leftColumn atrium rightColumn "
+    " description description description "
+    " leftButton deleteButton rightButton ";
   column-gap: 3px;
   row-gap: 5px;
 }
@@ -155,59 +142,21 @@ code {
   place-self: center;
 }
 
+.shopListPage-collapse-list-detail-deleteButton{
+  grid-area: deleteButton;
+  place-self: center;
+}
+
 .shopListPage-collapse-list-detail-rightButton{
   grid-area: rightButton;
   place-self: center;
 }
 
-.shopListPage-collapse-update-detail{
-  display: grid;
-  grid-template-rows: 7fr 1fr 2fr;
-  grid-template-columns: 1fr 1fr;
-  grid-template-areas:
-    " leftColumn rightColumn "
-    " serverError serverError "
-    " leftButton rightButton ";
-  column-gap: 3px;
-  row-gap: 5px;
-}
-
-.shopListPage-collapse-update-detail-leftColumn{
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  grid-area: leftColumn;
-  place-self: center;
-  min-height: 270px;
-}
-
-.shopListPage-collapse-update-detail-rightColumn{
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  grid-area: rightColumn;
-  place-self: center;
-  min-height: 300px;
-}
-
-.shopListPage-collapse-update-detail-serverError{
-  grid-area: serverError;
-  place-self: center;
-}
-
-.shopListPage-collapse-update-detail-leftButton{
-  grid-area: leftButton;
-  place-self: center;
-}
-
-.shopListPage-collapse-update-detail-rightButton{
-  grid-area: rightButton;
-  place-self: center;
-}
+/*** dishList page */
 
 .dishListPage-container{
   display: grid;
-  grid-template-columns: 3fr 14fr 3fr;
+  grid-template-columns: 1fr 8fr 1fr;
   grid-template-rows: 15px auto;
 }
 
@@ -219,3 +168,86 @@ code {
   grid-column: 2/3;
 }
 
+/* dishList-collapse */
+
+.dishListPage-collapse-list-detail{
+  display: grid;
+  grid-template-rows: 7fr 2fr 1fr;
+  grid-template-columns: 4fr 1fr 4fr;
+  grid-template-areas:
+    " leftColumn atrium rightColumn "
+    " description description description "
+    " leftButton deleteButton rightButton ";
+  column-gap: 3px;
+  row-gap: 5px;
+}
+
+.dishListPage-collapse-list-detail-leftColumn{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  grid-area: leftColumn;
+  place-self: center;
+  min-height: 270px;
+}
+
+.dishListPage-collapse-list-detail-rightColumn{
+  grid-area: rightColumn;
+  place-self: center;
+}
+
+.dishListPage-collapse-list-detail-description{
+  grid-area: description;
+  place-self: center;
+}
+
+.dishListPage-collapse-list-detail-leftButton{
+  grid-area: leftButton;
+  place-self: center;
+}
+
+.dishListPage-collapse-list-detail-deleteButton{
+  grid-area: deleteButton;
+  place-self: center;
+}
+
+.dishListPage-collapse-list-detail-rightButton{
+  grid-area: rightButton;
+  place-self: center;
+}
+
+/* cart **/
+.cart-container{
+  display: grid;
+  grid-template-columns: 3fr 8fr 3fr;
+  grid-template-rows: 10px auto;
+}
+
+.cart-item{
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: 5px;
+  grid-row: 2;
+  grid-column: 2/3;
+}
+
+.cart-item-container{
+  display: grid;
+  grid-template-columns: 70px 230px 20px 20px 20px;
+  grid-template-rows: 60px;
+}
+
+/* order**/
+.orderListPage-container{
+  display: grid;
+  grid-template-columns: 1fr 8fr 1fr;
+  grid-template-rows: 15px auto;
+}
+
+.orderListPage-collapse{
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: 20px;
+  grid-row: 2;
+  grid-column: 2/3;
+}

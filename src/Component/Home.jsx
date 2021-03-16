@@ -37,6 +37,7 @@ class Home extends Component{
                         (this.props.server.mainContent || []).map((shop, i) => (
                                 <ShopCard
                                     key={i}
+                                    shopId={shop.id}
                                     src={shop.imgUrl}
                                     alt={shop.name + " picture"}
                                     shopName={shop.shopName}
@@ -63,7 +64,7 @@ class Home extends Component{
                 <button
                     key={"owner"}
                     className={"btn btn-primary btn-sm active"}
-                    onClick={() => {this.props.history.push("/shops/list")}}>
+                    onClick={() => {this.props.history.push("/manage/shops")}}>
                     manage my shop
                 </button>
             )
@@ -73,7 +74,12 @@ class Home extends Component{
             buttonArray.push(
                 <button
                     key={"customer"}
-                    className={"btn btn-primary btn-sm active"}>
+                    className={"btn btn-primary btn-sm active"}
+                    onClick={() => {
+                        this.props.resetServer();
+                        this.props.history.push(`/orders`)
+                    }}
+                >
                     history orders
                 </button>
             )
@@ -81,34 +87,13 @@ class Home extends Component{
         return buttonArray;
     }
 
-    //layout buttonSeries has nothing to do with mainData
-    // buttonSeries = () => {
-    //     let buttonArray = []
-    //     if(this.props.currentUser.roles.includes("owner")){
-    //         buttonArray.push(
-    //             <button className={"btn btn-primary btn-sm active"}
-    //                     onClick={() => {this.props.history.push("/shops/list")}}>
-    //                 manage my shop
-    //             </button>
-    //         )
-    //     }
-    //     if(this.props.currentUser.roles.includes("customer")){
-    //         buttonArray.push(
-    //             <button className={"btn btn-primary btn-sm active"}>
-    //                 history orders
-    //             </button>
-    //         )
-    //     }
-    //     return buttonArray;
-    // }
-
-
     render(){
         return(
             <div>
                 <HeaderAndDrawer
                     mainContent={this.mainContent()}
-                    buttonSeries={this.buttonSeries()}/>
+                    buttonSeries={this.buttonSeries()}
+                />
             </div>
 
         )

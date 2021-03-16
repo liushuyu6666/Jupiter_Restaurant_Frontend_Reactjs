@@ -51,13 +51,18 @@ class ShopEdit extends Component{
 
     imageUpload = (event) => {
         const file = event.target.files[0];
-        const formData = new FormData();
-        let jwt = localStorage.getItem("Authorization");
         let imageId = this.props.server.mainContent.id;
-        formData.append("file", file);
-        formData.append("name", imageId);
 
-        updateImage(imageId, jwt, formData)
+        this.setState({
+            errors: {
+                ...this.state.errors,
+                imgUrl: {
+                    isValid: false,
+                    message: "",
+                }
+            }
+        })
+        updateImage(imageId, file)
             .then(res => {
                 if(res.result != null){
                     this.setState({
@@ -204,6 +209,7 @@ class ShopEdit extends Component{
                                                 formValue:{
                                                     ...this.state.formValue,
                                                     address:{
+                                                        ...this.state.formValue.address,
                                                         [event.target.id]: event.target.value,
                                                     },
                                                 }
@@ -281,7 +287,7 @@ class ShopEdit extends Component{
                     className={"btn btn-primary btn-sm active"}
                     onClick={() => {
                         this.props.resetServer();
-                        this.props.history.push("/");
+                        this.props.history.push("/manage/shops");
                     }}>
                     back
                 </button>
@@ -324,7 +330,6 @@ class ShopEdit extends Component{
                 })
             }
         }
-
         if(prevProps.server.errorsFromServer.isValid !== this.props.server.errorsFromServer.isValid){
             if(this.props.server.errorsFromServer.isValid){
                 this.setState({
@@ -342,6 +347,25 @@ class ShopEdit extends Component{
                         },
                     },
                 })
+            }
+        }
+        if(prevState.errors.imgUrl.isValid !== this.state.errors.imgUrl.isValid){
+            if(this.state.errors.imgUrl.isValid){
+                this.setState({
+                    formValue:{
+                        ...this.state.formValue,
+                        imgUrl: "http://s3.ca-central-1.amazonaws.com/jupiterlsy/loading_image",
+                    }
+                })
+                setTimeout(() => {
+                    // this.props.server.mainContent.imgUrl
+                    this.setState({
+                        formValue:{
+                            ...this.state.formValue,
+                            imgUrl: this.props.server.mainContent.imgUrl,
+                        }
+                    })
+                }, 3000);
             }
         }
     }

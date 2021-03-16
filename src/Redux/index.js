@@ -6,11 +6,14 @@ import serverReducer from "./server/reducer";
 
 // persist profile while refresh the web page
 const saveToLocalStorage = state => {
-    console.log("saveToLocalStorage");
-    console.log(state);
+    // console.log("saveToLocalStorage");
+    // console.log(state);
     try{
-        const reduxState = JSON.stringify(state.user); // ? state.user
-        localStorage.setItem("reduxState", reduxState);
+        const reduxStateUser = JSON.stringify(state.user); // ? state.user
+        localStorage.setItem("reduxStateUser", reduxStateUser);
+
+        const reduxStateCart = JSON.stringify(state.cart);
+        localStorage.setItem("reduxStateCart", reduxStateCart);
     } catch (e){
         console.log(e);
     }
@@ -18,10 +21,16 @@ const saveToLocalStorage = state => {
 
 const persistedState = () => {
     try{
-        const serializedState = localStorage.getItem("reduxState");
-        if(serializedState === null) return undefined;
-        let persistedValue = JSON.parse(serializedState);
-        return {user: persistedValue};
+        const serializedStateUser = localStorage.getItem("reduxStateUser");
+        if(serializedStateUser === null) return undefined;
+        let persistedValueUser = JSON.parse(serializedStateUser);
+
+        const serializedStateCart = localStorage.getItem("reduxStateCart");
+        if(serializedStateCart === null) return undefined;
+        let persistedValueCart = JSON.parse(serializedStateCart);
+
+        return {user: persistedValueUser,
+                cart: persistedValueCart};
     } catch (e){
         console.log(e);
         return undefined;
