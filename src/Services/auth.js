@@ -5,7 +5,7 @@ const register = (username, email, password, roles) => {
         "username": username,
         "email": email,
         "password": password,
-        "roles": roles,
+        "authorities": roles,
     }
     return post("/v1/jupiter/register",null, body)
 }

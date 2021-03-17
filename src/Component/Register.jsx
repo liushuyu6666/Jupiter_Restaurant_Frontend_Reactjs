@@ -77,10 +77,10 @@ class Register extends Component{
                         this.setState({
                         errorsFromServer: {
                             isValid: true,
-                            message: "jumping to user page..."}
+                            message: "jumping to home page..."}
                     }),
                         3000);
-                    setTimeout(()=>this.props.history.push("/user"),
+                    setTimeout(()=>this.props.history.push("/"),
                         5000);
                 }
                 else{
