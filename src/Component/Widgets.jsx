@@ -506,7 +506,7 @@ const DishManageCollapse = (props) => {
                                     className={"btn btn-primary btn-sm active"}
                                     onClick={(event) => {
                                         dispatch(resetServer());
-                                        // history.push(`/edit/shops/${event.target.id}`);
+                                        history.push(`/edit/shops/${props.dish.shopId}/dishes/${props.dish.dishId}`);
                                     }}>
                                     edit
                                 </button>

@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {withRouter} from "react-router-dom";
-import {retrieveShop, updateShop} from "../Services/shop";
+import {retrieveDishUnderOwner, updateDish} from "../Services/dish";
 import {loadPage} from "../Support/supportFunctions";
 import HeaderAndDrawer from "./HeaderAndDrawer";
 import {FormGroup, ArrayInputTags, LoadingDataPage, NoPermissionPage} from "./Widgets";
@@ -9,26 +9,22 @@ import {resetServer} from "../Redux/server/actionCreator";
 import {updateImage} from "../Services/file";
 
 
-class ShopEdit extends Component{
+class DishEdit extends Component{
 
     constructor(props) {
         super(props);
         this.state = {
             formValue: {
-                id: "",
-                shopName: "",
-                desc: "",
+                shopId: this.props.match.params.shopId,
+                name: "",
                 imgUrl: "",
+                desc: "",
                 categories: [],
-                ownerId: "",
-                address: {
-                    country: "",
-                    city: "",
-                    street: ""
-                },
+                price: 0,
             },
             auxiliaryValue: {
                 category: "",
+                image: null
             },
             button:{
                 categoriesButton: false,
@@ -137,14 +133,16 @@ class ShopEdit extends Component{
 
     save = () => {
         let updatingValue = this.state.formValue;
-        updateShop(this.props.server.mainContent.id,
+        console.log("updatingValue");
+        console.log(updatingValue);
+        updateDish(this.props.match.params.dishId,
             localStorage.getItem("Authorization"),
             updatingValue)
             .then(res => {
                 if(res.result != null){
                     this.props.resetServer();
                     window.alert(res.msg);
-                    this.props.history.push(`/manage/shops`)
+                    this.props.history.push(`/manage/shops/${this.props.match.params.shopId}/dishes`)
                 }
                 else{
                     window.alert(res.msg);
@@ -170,16 +168,31 @@ class ShopEdit extends Component{
             <div className="login-register-container">
                 <form className="login-register-content">
                     <FormGroup
-                        key={"shopName"}
-                        id={"shopName"}
-                        inputValue={this.state.formValue["shopName"]}
-                        show={"shop name"}
+                        key={"name"}
+                        id={"name"}
+                        inputValue={this.state.formValue["name"]}
+                        show={"dish name"}
                         type={"text"}
                         change={(event) => {
                             this.setState({
                                 formValue:{
                                     ...this.state.formValue,
-                                    shopName: event.target.value,
+                                    name: event.target.value,
+                                }
+                            })
+                        }}
+                    />
+                    <FormGroup
+                        key={"price"}
+                        id={"price"}
+                        inputValue={this.state.formValue["price"]}
+                        show={"price"}
+                        type={"text"}
+                        change={(event) => {
+                            this.setState({
+                                formValue:{
+                                    ...this.state.formValue,
+                                    price: event.target.value,
                                 }
                             })
                         }}
@@ -199,33 +212,6 @@ class ShopEdit extends Component{
                             })
                         }}
                     />
-                    {(this.state.formValue !== null)?
-                        (
-                            ["country", "city", "street"].map(item => (
-                                <FormGroup
-                                    key={item}
-                                    id={item}
-                                    inputValue={this.state.formValue.address[item]}
-                                    show={item}
-                                    type={"text"}
-                                    change={(event) => {
-                                        this.setState({
-                                            formValue:{
-                                                ...this.state.formValue,
-                                                address:{
-                                                    ...this.state.formValue.address,
-                                                    [event.target.id]: event.target.value,
-                                                },
-                                            }
-                                        })
-                                    }}
-                                />
-                            ))
-                        ):
-                        (<div>
-
-                        </div>)
-                    }
                     <ArrayInputTags show={"categories"}
                                     name={"category"} // event.target.name
                                     id={"category"}
@@ -235,18 +221,19 @@ class ShopEdit extends Component{
                                     buttonEnable={this.state.button.categoriesButton}
                                     addFunc={this.arrayAdd}
                                     removeFunc={this.arrayRemove}
+                                    abc={this.state.button.abc}
                                     changeFunc={(event) => {
                                         this.setState({
                                             auxiliaryValue:{
+                                                ...this.state.auxiliaryValue,
                                                 category: event.target.value,
                                             }
                                         })
                                     }}
                     />
-
                     <FormGroup
-                        id={"imgUrl"}
-                        inputValue={""}
+                        id={"img"}
+                        inputValue={this.state.auxiliaryValue.imageName}
                         show={"upload image"}
                         type={"file"}
                         isValid={this.state.errors.imgUrl.isValid}
@@ -283,7 +270,7 @@ class ShopEdit extends Component{
                     className={"btn btn-primary btn-sm active"}
                     onClick={() => {
                         this.props.resetServer();
-                        this.props.history.push("/manage/shops");
+                        this.props.history.push(`/manage/shops/${this.props.match.params.shopId}/dishes`);
                     }}>
                     back
                 </button>
@@ -297,13 +284,15 @@ class ShopEdit extends Component{
             <div>
                 <HeaderAndDrawer
                     mainContent={this.mainContent()}
-                    buttonSeries={this.buttonSeries()}/>
+                    buttonSeries={this.buttonSeries()}
+                />
             </div>
         )
     }
 
     componentDidMount() {
-        loadPage(retrieveShop(this.props.match.params.shopId));
+        loadPage(retrieveDishUnderOwner(this.props.match.params.shopId,
+            this.props.match.params.dishId, localStorage.getItem("Authorization")));
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -330,17 +319,12 @@ class ShopEdit extends Component{
             if(this.props.server.errorsFromServer.isValid){
                 this.setState({
                     formValue: {
-                        id: this.props.server.mainContent.id,
-                        shopName: this.props.server.mainContent.shopName,
-                        desc: this.props.server.mainContent.desc,
+                        shopId: this.props.server.mainContent.shopId,
+                        name: this.props.server.mainContent.name,
                         imgUrl: this.props.server.mainContent.imgUrl,
+                        desc: this.props.server.mainContent.desc,
                         categories: this.props.server.mainContent.categories,
-                        ownerId: this.props.server.mainContent.ownerId,
-                        address: {
-                            country: this.props.server.mainContent.address.country,
-                            city: this.props.server.mainContent.address.city,
-                            street: this.props.server.mainContent.address.street
-                        },
+                        price: this.props.server.mainContent.price,
                     },
                 })
             }
@@ -365,7 +349,6 @@ class ShopEdit extends Component{
             }
         }
     }
-
 }
 
 const mapStateToProps = (state) => (
@@ -382,4 +365,4 @@ const mapDispatchToProps = {
 export default connect(
     mapStateToProps,
     mapDispatchToProps,
-)(withRouter(ShopEdit));
+)(withRouter(DishEdit));

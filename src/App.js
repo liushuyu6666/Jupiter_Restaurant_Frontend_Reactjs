@@ -15,6 +15,7 @@ import ShopAdd from "./Component/ShopAdd";
 import DishesManage from "./Component/DishesManage";
 import DishAdd from "./Component/DishAdd";
 import OrdersList from "./Component/OrdersList";
+import DishEdit from "./Component/DishEdit";
 
 
 function App() {
@@ -45,6 +46,9 @@ function App() {
               </Route>
               <Route path="/add/shops/:shopId/dishes" exact>
                   <DishAdd />
+              </Route>
+              <Route path="/edit/shops/:shopId/dishes/:dishId" exact>
+                  <DishEdit />
               </Route>
 
               <Route path="/register" exact>
