@@ -7,6 +7,7 @@ import {FormGroup, ArrayInputTags, LoadingDataPage, NoPermissionPage} from "./Wi
 import {connect} from "react-redux";
 import {resetServer} from "../Redux/server/actionCreator";
 import {updateImage} from "../Services/file";
+import {loadImageUrl} from "../global";
 
 
 class ShopEdit extends Component{
@@ -54,18 +55,27 @@ class ShopEdit extends Component{
         let imageId = this.props.server.mainContent.id;
 
         this.setState({
+            formValue: {
+                ...this.state.formValue,
+                imgUrl: loadImageUrl,
+            },
             errors: {
                 ...this.state.errors,
                 imgUrl: {
                     isValid: false,
-                    message: "",
+                    message: "uploading...",
                 }
             }
         })
         updateImage(imageId, file)
             .then(res => {
                 if(res.result != null){
+                    const d = new Date();
                     this.setState({
+                        formValue: {
+                            ...this.state.formValue,
+                            imgUrl: `${this.props.server.mainContent.imgUrl}?t=${d.getTime()}`,
+                        },
                         errors:{
                             ...this.state.errors,
                             imgUrl: {
@@ -77,6 +87,10 @@ class ShopEdit extends Component{
                 }
                 else{
                     this.setState({
+                        formValue: {
+                            ...this.state.formValue,
+                            imgUrl: `${this.props.server.mainContent.imgUrl}`,
+                        },
                         errors:{
                             ...this.state.errors,
                             imgUrl: {
@@ -89,6 +103,10 @@ class ShopEdit extends Component{
             })
             .catch(err => {
                 this.setState({
+                    formValue: {
+                        ...this.state.formValue,
+                        imgUrl: `${this.props.server.mainContent.imgUrl}`,
+                    },
                     errors:{
                         ...this.state.errors,
                         imgUrl: {
@@ -156,6 +174,7 @@ class ShopEdit extends Component{
     }
 
     mainContent = () => {
+        const d = new Date();
         if(this.props.server.isLoading){
             return(
                 <LoadingDataPage message={"the page is loading..."} />
@@ -254,7 +273,7 @@ class ShopEdit extends Component{
                         change={this.imageUpload}
                     />
                     <img
-                        src={this.state.formValue.imgUrl}
+                        src={`${this.state.formValue.imgUrl}?t=${d.getTime()}`}
                         alt={"shop image"}
                         width="200" height="120"/>
                 </form>
@@ -343,25 +362,6 @@ class ShopEdit extends Component{
                         },
                     },
                 })
-            }
-        }
-        if(prevState.errors.imgUrl.isValid !== this.state.errors.imgUrl.isValid){
-            if(this.state.errors.imgUrl.isValid){
-                this.setState({
-                    formValue:{
-                        ...this.state.formValue,
-                        imgUrl: "http://s3.ca-central-1.amazonaws.com/jupiterlsy/loading_image",
-                    }
-                })
-                setTimeout(() => {
-                    // this.props.server.mainContent.imgUrl
-                    this.setState({
-                        formValue:{
-                            ...this.state.formValue,
-                            imgUrl: this.props.server.mainContent.imgUrl,
-                        }
-                    })
-                }, 3000);
             }
         }
     }

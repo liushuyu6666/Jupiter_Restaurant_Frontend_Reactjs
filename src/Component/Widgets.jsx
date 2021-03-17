@@ -1,4 +1,4 @@
-import React, {Component, useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {addItemInCart, deleteItemFromCart, countItems, resetCart} from "../Redux/cart/actionCreator";
 import {Accordion, Button, Card} from "react-bootstrap";
@@ -7,6 +7,7 @@ import {useHistory} from "react-router";
 import {deleteShop} from "../Services/shop";
 import {deleteDish} from "../Services/dish";
 import {createOrder} from "../Services/order";
+import {sadFaceUrl} from "../global";
 
 
 /******* layout *******/
@@ -14,6 +15,7 @@ const ShopCard = (props) => {
 
     const history = useHistory();
     let lengthOfTag = 0;
+    const d = new Date();
 
     const randomColor = () => {
         const beautifulColor =
@@ -43,7 +45,7 @@ const ShopCard = (props) => {
         >
             <img
                 id={props.shopId}
-                 src={props.src}
+                 src={`${props.src}?t=${d.getTime()}`}
                  className="card-img-top"
                  alt={props.alt}
                  style={{height: "160px", width: "300px", cursor: "pointer"}}
@@ -82,8 +84,8 @@ const ShopCard = (props) => {
 const DishCard = (props) => {
 
     const [hover, setHover] = useState(false);
-    const cart = useSelector(state => state.cart);
     const dispatch = useDispatch();
+    const d = new Date();
 
     let lengthOfTag = 0;
 
@@ -136,7 +138,7 @@ const DishCard = (props) => {
     return(
         <div className="card"
              style={{minHeight: "200px", width: "250px", backgroundColor: "white"}}>
-            <img src={props.src}
+            <img src={`${props.src}?t=${d.getTime()}`}
                  className="card-img-top"
                  alt={props.alt}
                  style={{height: "120px", width: "250px"}}/>
@@ -264,6 +266,8 @@ const ShopManageCollapse = (props) => {
 
     }
 
+    const d = new Date();
+
     return(
         <Card>
             <Card.Header style={{backgroundColor: "#609E99"}}>
@@ -318,7 +322,7 @@ const ShopManageCollapse = (props) => {
                                     show={"categories"}
                                     arrayValues={props.shop.categories}/>
                                 <img
-                                    src={props.shop.imgUrl}
+                                    src={`${props.shop.imgUrl}?t=${d.getTime()}`}
                                     alt={props.shop.shopName}
                                     width="200" height="120"/>
                             </div>
@@ -440,17 +444,21 @@ const DishManageCollapse = (props) => {
 
     }
 
+    const d = new Date();
+
     return(
         <Card>
             <Card.Header style={{backgroundColor: "#609E99"}}>
                 <h5 className="mb-0 d-flex justify-content-between">
-                    <Accordion.Toggle as={Button} variant="link" eventKey={props.eventKey}
-                                      className={`${isOpen.button}`}
+                    <Accordion.Toggle
+                        as={Button} variant="link" eventKey={props.eventKey}
+                        className={`${isOpen.button}`}
                         // data-toggle="collapse"
                         // data-target="#collapseOne"
-                                      disabled={!isOpen.buttonEnabled}
-                                      style={{color: "white"}}
-                                      onClick={clickCollapse}>
+                        disabled={!isOpen.buttonEnabled}
+                        style={{color: "white"}}
+                        onClick={clickCollapse}
+                    >
                         {props.dish.dishName}
                     </Accordion.Toggle>
                     <button
@@ -469,12 +477,12 @@ const DishManageCollapse = (props) => {
                             <div
                                 className={"dishListPage-collapse-list-detail-leftColumn"}
                             >
-                                <FormGroup id={"createAt"}
+                                <FormGroup id={`createAt-${props.dish.dishId}`}
                                            inputValue={props.dish.createAt}
                                            show={"create time:"}
                                            type={"text"}
                                            change={() => {}}/>
-                                <FormGroup id={"modifiedAt"}
+                                <FormGroup id={`modifiedAt-${props.dish.dishId}`}
                                            inputValue={props.dish.updateAt}
                                            show={"update time:"}
                                            type={"text"}
@@ -489,12 +497,12 @@ const DishManageCollapse = (props) => {
                                     show={"categories"}
                                     arrayValues={props.dish.categories}/>
                                 <img
-                                    src={props.dish.imgUrl}
+                                    src={`${props.dish.imgUrl}?t=${d.getTime()}`}
                                     alt={props.dish.dishName}
                                     width="200" height="120"/>
                             </div>
                             <div className={"dishListPage-collapse-list-detail-description"}>
-                                <FormGroup id={"desc"}
+                                <FormGroup id={`desc-${props.dish.dishId}`}
                                            inputValue={props.dish.desc}
                                            show={"desc"}
                                            type={"text"}
@@ -532,7 +540,6 @@ const DishManageCollapse = (props) => {
 }
 
 const OrderManageCollapse = (props) => {
-    const history = useHistory();
     const [isOpen, setIsOpen] = useState({
         button: "btn btn-link collapsed",
         collapse: "collapse",
@@ -837,10 +844,11 @@ const CartDropdown = (props) => {
     const [top, setTop] = useState("");
     const [left, setLeft] = useState("");
     const winWidth = window.innerWidth;
+    const d = new Date();
 
     const toggle = (event) => {
         event.preventDefault();
-        const {offsetTop, offsetLeft, offsetHeight, offsetWidth} = cartRef.current;
+        const {offsetTop, offsetLeft, offsetHeight} = cartRef.current;
 
         setTop((offsetTop + offsetHeight).toString() + "px");
         setLeft((winWidth - 430 - offsetLeft).toString() + "px");
@@ -853,6 +861,7 @@ const CartDropdown = (props) => {
         const items = {};
         cart.cartItems.map(item => {
             items[item.dishId] = item.amount;
+            return items;
         })
         const body = {
             "dishAmount": items,
@@ -876,14 +885,14 @@ const CartDropdown = (props) => {
 
     useEffect(() => {
         dispatch(countItems());
-    }, [cart.cartItems]);
+    }, [cart.cartItems, dispatch]);
 
     const mainContent = () => {
         const items = [];
         if(cart.cartItems.length === 0){
             items.push(
                 <div className={"cart-item-container"}>
-                    <img src={"http://s3.ca-central-1.amazonaws.com/jupiterlsy/sad_face_for_block_page.png"}
+                    <img src={sadFaceUrl}
                          className="card-img-top"
                          alt={"small dish"}
                          style={{height: "50px", width: "70px"}}/>
@@ -902,7 +911,7 @@ const CartDropdown = (props) => {
             cart.cartItems.map(item => (
                 items.push(
                     <div className={"cart-item-container"}>
-                        <img src={item.imgUrl}
+                        <img src={`${item.imgUrl}?t=${d.getTime()}`}
                              className="card-img-top"
                              alt={"small dish"}
                              style={{height: "50px", width: "70px"}}/>
@@ -971,7 +980,7 @@ const NoPermissionPage = (props) => {
         <div className={"d-flex justify-content-around"}>
             <div className={"d-flex flex-column align-items-center"}>
                 <img
-                    src="http://s3.ca-central-1.amazonaws.com/jupiterlsy/sad_face_for_block_page.png"
+                    src={sadFaceUrl}
                     style={{width: 200, height: 200}}
                     alt="you can't access to this page"
                 />
