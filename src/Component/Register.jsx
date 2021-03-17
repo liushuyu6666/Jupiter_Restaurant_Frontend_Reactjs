@@ -1,219 +1,103 @@
 import React, {Component} from "react";
 import {withRouter} from "react-router-dom";
-import {FormGroup, Dropdown} from "./Widgets";
+import {FormGroup, Dropdown, CheckBox, AlertText} from "./Widgets";
+import {register} from "../Services/auth"
+
+const ROLES = ["customer", "owner", "admin"];
 
 class Register extends Component{
     constructor(props) {
         super(props);
         this.state = {
-            formValue: {username: "", email: "", password: "", confirm: "", role: "customer"},
-            errors: {username: {classname: "", text: "", promptClassname: ""},
-                    email: {classname: "is-valid", text: "", promptClassname: ""},
-                    password: {classname: "", text: "", promptClassname: ""},
-                    confirm: {classname: "", text: "", promptClassname: ""}},
-            buttonEnabled: false,
-            errorsFromServer: {value: "", color: ""},
-
+            formValue: {
+                username: "",
+                email: "",
+                password: "",
+                confirm: "",
+                roles: ROLES.reduce((acc,curr)=> (acc[curr]=false, acc),{}),
+            },
+            errors: {
+                username: {isValid: false, message: ""},
+                email: {isValid: true, message: ""},
+                password: {isValid: false, message: ""},
+                confirm: {isValid: false, message: ""},
+            },
+            buttonEnabled: false, // button will check all 5 isValid filed.
+            errorsFromServer: {isValid: true, message: ""},
         }
-        this.roles = ["customer", "owner", "admin"];
-        this.allUsername = [];
     }
 
     // change values of input except role value
     change = (event) => {
         event.preventDefault();
-
         // clear errorsFromServer and fill in input values
         this.setState({
             formValue: {
                 ...this.state.formValue,
                 [event.target.id]: event.target.value},
-            errorsFromServer: {value: "", color: ""},
-        }, () => {this.check(event)});
+        });
     }
 
     // change values of role value, listen which role is selected
-    selectedItemFromDropdown = (event) =>{
-        event.preventDefault();
+    roleChange = (event) => {
+        // console.log(event.target);
         this.setState({
             formValue: {
                 ...this.state.formValue,
-                role: event.target.id,
+                roles: {
+                    ...this.state.formValue.roles,
+                    [event.target.value]: !this.state.formValue.roles[event.target.value]
+                }
             },
-            errorsFromServer: {value: "", color: ""},
-        }, () => {this.check(event)});
-    }
-
-    check = (e) => {
-
-        e.preventDefault();
-
-        const username = {};
-        const email = {};
-        const password = {};
-        const confirm = {};
-
-        let change = {};
-        let confirmInPassword = false;
-
-        // check username, need to check username.trim() first
-        // // when check if username is empty, use trim().
-        if(e.target.id === "username") {
-            if (this.state.formValue.username.trim() === "") {
-                username.classname = "is-invalid"
-                username.promptClassname = "invalid-feedback";
-                username.text = "username can't be empty";
-            } else if (this.state.formValue.username.length > 30) {
-                username.classname = "is-invalid";
-                username.promptClassname = "invalid-feedback";
-                username.text = "username can't be larger than 30 characters";
-            } else if (this.state.formValue.username.indexOf(' ') >= 0) {
-                username.classname = "is-invalid"
-                username.promptClassname = "invalid-feedback";
-                username.text = "username can't contain white space";
-            } else {
-                username.classname = "is-valid"
-                username.promptClassname = "valid-feedback";
-                username.text = "";
-            }
-            change = username;
-        }
-
-        // check email
-        if(e.target.id === "email") {
-            if (this.state.formValue.email.trim() === "") {
-                email.classname = "is-valid"
-                email.promptClassname = "valid-feedback";
-                email.text = "no email address? that's ok";
-            } else if (this.state.formValue.email.indexOf('@') < 0) {
-                email.classname = "is-invalid"
-                email.promptClassname = "invalid-feedback";
-                email.text = "seems like an invalid email address";
-            } else {
-                email.classname = "is-valid"
-                email.promptClassname = "valid-feedback";
-                email.text = "perfect! go on";
-            }
-            change = email;
-        }
-
-        // check password
-        else if(e.target.id === "password") {
-            if (this.state.formValue.password.trim() === "") {
-                password.classname = "is-invalid"
-                password.promptClassname = "invalid-feedback";
-                password.text = "password can't be empty";
-            } else if (this.state.formValue.password.length > 30) {
-                password.classname = "is-invalid"
-                password.promptClassname = "invalid-feedback";
-                password.text = "password can't be larger than 30 characters";
-            } else if (this.state.formValue.password.indexOf(' ') >= 0) {
-                password.classname = "is-invalid"
-                password.promptClassname = "invalid-feedback";
-                password.text = "password can't contain white space";
-            } else {
-                password.classname = "is-valid"
-                password.promptClassname = "valid-feedback";
-                password.text = "it works";
-            }
-            change = password;
-            if(this.state.errors.confirm.classname !== ""
-            && this.state.formValue.confirm !== this.state.formValue.password){
-                confirmInPassword = true;
-                confirm.classname = "is-invalid";
-                confirm.promptClassname = "invalid-feedback";
-                confirm.text = "password doesn't match";
-            }
-            else if(this.state.errors.confirm.classname !== ""
-            && this.state.formValue.confirm === this.state.formValue.password){
-                confirmInPassword = true;
-                confirm.classname = "is-valid";
-                confirm.promptClassname = "valid-feedback";
-                confirm.text = "the same";
-            }
-        }
-
-        // check confirm
-        else if(e.target.id === "confirm"){
-            if (this.state.formValue.confirm.trim() === "") {
-                confirm.classname = "is-invalid"
-                confirm.promptClassname = "invalid-feedback";
-                confirm.text = "password can't be empty";
-            } else if (this.state.formValue.confirm.length > 30){
-                confirm.classname = "is-invalid";
-                confirm.promptClassname = "invalid-feedback";
-                confirm.text = "password can't be larger than 30 characters";
-            } else if (this.state.formValue.confirm !== this.state.formValue.password) {
-                confirm.classname = "is-invalid";
-                confirm.promptClassname = "invalid-feedback";
-                confirm.text = "password doesn't match";
-            } else {
-                confirm.classname = "is-valid"
-                confirm.promptClassname = "valid-feedback";
-                confirm.text = "the same";
-            }
-            change = confirm;
-        }
-
-        // update the state and button
-        if(!confirmInPassword){
-            this.setState({
-                errors:{
-                    ...this.state.errors,
-                    [e.target.id]: change,
-                }
-            }, () => this.buttonChange())
-        } else {
-            this.setState({
-                errors:{
-                    ...this.state.errors,
-                    password: change,
-                    confirm: confirm,
-                }
-            }, () => this.buttonChange())
-        }
-
-    }
-
-    // when input values change, button will be changed correspondingly
-    buttonChange = () => {
-        let buttonEnabled = (this.state.errors.username.classname === "is-valid")
-        && (this.state.errors.password.classname === "is-valid")
-        && (this.state.errors.confirm.classname === "is-valid")
-        && (this.state.errors.email.classname === "is-valid")
-        && (this.state.errorsFromServer.value.trim() === "");
-
-        this.setState({
-            buttonEnabled: buttonEnabled,
+            errorsFromServer: {isValid: true, message: ""},
         })
     }
 
-    submit = (event) => {
-        event.preventDefault();
-
-        fetch("/v1/register",{
-            "method": "POST",
-            "headers": {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                "username": this.state.formValue.username,
-                "password": this.state.formValue.password,
-                "email": this.state.formValue.email,
-                "role": this.state.formValue.role,
-            })
-        }).then(res => res.json())
+    submit = () => {
+        let rolesArray = [];
+        let rolesObject = this.state.formValue.roles;
+        Object.keys(rolesObject).map(k => {
+            if(rolesObject[k]){
+                rolesArray.push(k);
+            }
+        });
+        register(
+            this.state.formValue.username,
+            this.state.formValue.email,
+            this.state.formValue.password,
+            rolesArray)
             .then(res => {
+                if(res.result != null){
+                    this.setState({
+                        errorsFromServer: {
+                            isValid: true,
+                            message: res.msg}
+                    });
+                    setTimeout(()=>
+                        this.setState({
+                        errorsFromServer: {
+                            isValid: true,
+                            message: "jumping to user page..."}
+                    }),
+                        3000);
+                    setTimeout(()=>this.props.history.push("/user"),
+                        5000);
+                }
+                else{
+                    this.setState({
+                        errorsFromServer: {
+                            isValid: false,
+                            message: res.msg}
+                    })
+                }
+            })
+            .catch(err => {
                 this.setState({
                     errorsFromServer: {
-                        value: res.msg,
-                        color: (res.err === null)?"green":"red",
-                    },
-                }, () => {
-                    this.buttonChange();
-                });
+                        isValid: false,
+                        message: "error from server!"}
+                })
             })
-        // check button status again
     }
 
     test = () => {
@@ -222,88 +106,137 @@ class Register extends Component{
 
     render(){
         return(
-            <form className={"d-flex justify-content-around"}>
-                <div>
-
+            <div className={"login-register-container"}>
+                <div className={"login-register-content"}>
+                    <form>
+                        <h4 className={"d-flex"}
+                            style={{color:"#00635a"}}><strong>register</strong>
+                        </h4>
+                        {
+                            ["username", "email", "password", "confirm"].map(item => (
+                                <FormGroup
+                                    key={item}
+                                    id={item}
+                                    inputValue={this.state.formValue[item]}
+                                    show={item}
+                                    type={"text"}
+                                    isValid={this.state.errors[item].isValid}
+                                    errorMessage={this.state.errors[item].message}
+                                    change={this.change}
+                                />
+                            ))
+                        }
+                        <CheckBox id={"roles"}
+                                  show={"select roles"}
+                                  selectValues={ROLES}
+                                  change={this.roleChange}/>
+                        <AlertText isValid={this.state.errorsFromServer.isValid}
+                                   message={this.state.errorsFromServer.message}/>
+                        <div className={"form-group"}>
+                            <button type="button"
+                                    className={"btn btn-primary btn-sm active"}
+                                    disabled={!this.state.buttonEnabled}
+                                    onClick={this.submit}>register</button>
+                        </div>
+                    </form>
                 </div>
-                <div className={"d-flex flex-column"}>
-                    <h4 className={"d-flex"}
-                        style={{color:"#00635a"}}><strong>register</strong>
-                    </h4>
-                    <FormGroup
-                        id={"username"}
-                        inputValue={this.state.formValue["username"]}
-                        show={"username"}
-                        type={"text"}
-                        className={this.state.errors.username.classname}
-                        promptClassname={this.state.errors.username.promptClassname}
-                        promptText={this.state.errors.username.text}
-                        change={this.change}
-                    />
-                    <FormGroup
-                        id={"email"}
-                        inputValue={this.state.formValue["email"]}
-                        show={"email"}
-                        type={"text"}
-                        className={this.state.errors.email.classname}
-                        promptClassname={this.state.errors.email.promptClassname}
-                        promptText={this.state.errors.email.text}
-                        change={this.change}
-                    />
-                    <FormGroup
-                        id={"password"}
-                        inputValue={this.state.formValue["password"]}
-                        show={"password"}
-                        type={"password"}
-                        className={this.state.errors.password.classname}
-                        promptClassname={this.state.errors.password.promptClassname}
-                        promptText={this.state.errors.password.text}
-                        change={this.change}
-                    />
-                    <FormGroup
-                        id={"confirm"}
-                        inputValue={this.state.formValue["confirm"]}
-                        show={"confirm password"}
-                        type={"password"}
-                        className={this.state.errors.confirm.classname}
-                        promptClassname={this.state.errors.confirm.promptClassname}
-                        promptText={this.state.errors.confirm.text}
-                        change={this.change}
-                    />
-                    <Dropdown
-                        id={"role"}
-                        show={"role"}
-                        dropdownItems={this.roles}
-                        selectedItemFromDropdown={this.selectedItemFromDropdown}
-                    />
-                    <p className={"text-center"} style={{color:this.state.errorsFromServer.color}}>
-                        {this.state.errorsFromServer.value}
-                    </p>
-                    <div className={"form-group"}>
-                        <button type="button"
-                                className={"btn btn-primary btn-sm active"}
-                                disabled={!this.state.buttonEnabled}
-                                onClick={this.submit}>register</button>
-                    </div>
-                </div>
-                <div >
-                </div>
-            </form>
+            </div>
         );
     }
 
-    componentDidMount() {
-        // fetch("/v1/register",{
-        //     "method": "POST",
-        //     "headers": {
-        //         "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify({
-        //         "username": this.state.formValue.username,
-        //         "password": this.state.formValue.password,
-        //         "email": this.state.formValue.email,
-        //     })
-        // })
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        // check the input box validation
+        if(this.state.formValue.username !== prevState.formValue.username){
+            let username = {};
+            if (this.state.formValue.username.trim() === "") {
+                username.isValid = false;
+                username.message = "username can't be empty";
+            } else if (this.state.formValue.username.length > 50) {
+                username.isValid = false;
+                username.message = "username should be less than 50";
+            } else if (this.state.formValue.username.indexOf(' ') >= 0) {
+                username.isValid = false;
+                username.message = "username can't contain white space";
+            } else {
+                username.isValid = true;
+                username.message = "";
+            }
+            this.setState({
+                errors: {
+                    ...this.state.errors,
+                    username: username,
+                },
+            })
+        }
+        if(this.state.formValue.email !== prevState.formValue.email){
+            let email = {};
+            if (this.state.formValue.email.trim() === "") {
+                email.isValid = true;
+                email.message = "no email address? that's ok";
+            } else if (this.state.formValue.email.indexOf('@') < 0) {
+                email.isValid = false;
+                email.message = "seems like an invalid email address";
+            } else {
+                email.isValid = true;
+                email.message = "perfect! go on";
+            }
+            this.setState({
+                errors: {
+                    ...this.state.errors,
+                    email: email,
+                },
+            })
+        }
+        if(this.state.formValue.password !== prevState.formValue.password
+        || this.state.formValue.confirm !== prevState.formValue.confirm){
+            let password = {};
+            if (this.state.formValue.password.trim() === "") {
+                password.isValid = false;
+                password.message = "password can't be empty";
+            } else if (this.state.formValue.password.length > 30) {
+                password.isValid = false;
+                password.message = "password can't be larger than 30 characters";
+            } else if (this.state.formValue.password.indexOf(' ') >= 0) {
+                password.isValid = false;
+                password.message = "password can't contain white space";
+            } else {
+                password.isValid = true;
+                password.message = "it works";
+            }
+            let confirm = {isValid: false, message: ""};
+            if(this.state.formValue.confirm !== this.state.formValue.password){
+                confirm.isValid = false;
+                confirm.message = "password doesn't match";
+            }
+            else{
+                confirm.isValid = true;
+                confirm.message = "the same";
+            }
+            this.setState({
+                errors: {
+                    ...this.state.errors,
+                    password: password,
+                    confirm: confirm,
+                },
+            })
+        }
+        // submit button validation
+        if(this.state.errors !== prevState.errors
+            || this.state.errorsFromServer !== prevState.errorsFromServer){
+            let buttonEnabled = true;
+            for (const [key, val] of Object.entries(this.state.errors)){
+                buttonEnabled = buttonEnabled && val.isValid;
+            }
+            this.setState({
+                buttonEnabled: buttonEnabled && this.state.errorsFromServer.isValid,
+            })
+        }
+        // update the errors from server
+        if(this.state.formValue !== prevState.formValue){
+            this.setState({
+                errorsFromServer: {isValid: true, message: ""},
+            })
+        }
     }
 
 }
