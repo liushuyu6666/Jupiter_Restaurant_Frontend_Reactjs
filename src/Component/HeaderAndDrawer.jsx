@@ -72,9 +72,49 @@ class HeaderAndDrawer extends Component{
                     <p>don't have account?
                         <span
                             onClick={this.register}
-                            style={{cursor: "pointer"}}>
+                            style={{cursor: "pointer", color: "#00635a"}}>
                         register here
                     </span></p>
+                    <br/>
+                    <p>existed users: password: 1123</p>
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Username</th>
+                                <th scope="col">Roles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">liushuyu</th>
+                                <td>customer, owner, admin</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">customer</th>
+                                <td>customer</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">admin</th>
+                                <td>admin</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">owner</th>
+                                <td>owner</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">yeager</th>
+                                <td>customer, admin</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">mikasa</th>
+                                <td>customer, owner</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">armin</th>
+                                <td>admin owner</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         )
