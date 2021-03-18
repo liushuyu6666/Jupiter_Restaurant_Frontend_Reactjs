@@ -8,6 +8,7 @@ import {deleteShop} from "../Services/shop";
 import {deleteDish} from "../Services/dish";
 import {createOrder} from "../Services/order";
 import {sadFaceUrl} from "../global";
+import {deleteProfile} from "../Redux/user/actionCreator";
 
 
 /******* layout *******/
@@ -838,7 +839,9 @@ const Dropdown = (props) => {
 const CartDropdown = (props) => {
 
     const cartRef = useRef();
+    const history = useHistory();
     const cart = useSelector(state => state.cart);
+    const user = useSelector(state => state.user);
     const dispatch = useDispatch();
     const [isOpen, setIsOpen] = useState("");
     const [top, setTop] = useState("");
@@ -936,14 +939,38 @@ const CartDropdown = (props) => {
                     </div>
                 )
             ));
-            items.push(
-                <button
-                    onClick={saveOrder}
-                    className={"btn btn-primary btn-sm active"}
-                >
-                    place the order
-                </button>
-            );
+            if(user.profile.roles && user.profile.roles.includes("customer")){
+                items.push(
+                    <button
+                        onClick={saveOrder}
+                        className={"btn btn-primary btn-sm active"}
+                    >
+                        place the order
+                    </button>
+                );
+            }
+            else{
+                items.push(
+                    <button
+                        onClick={() => {
+                            resetServer();
+                            deleteProfile();
+                            history.push("/login");
+                        }}
+                        className={"btn btn-primary btn-sm active"}
+                    >
+                        need customer role to place the order
+                    </button>
+                );
+            }
+            // items.push(
+            //     <button
+            //         onClick={saveOrder}
+            //         className={"btn btn-primary btn-sm active"}
+            //     >
+            //         place the order
+            //     </button>
+            // );
         }
         return items;
     }
